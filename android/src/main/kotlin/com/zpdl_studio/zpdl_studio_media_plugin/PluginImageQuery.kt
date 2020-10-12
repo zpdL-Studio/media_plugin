@@ -16,7 +16,6 @@ import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginImageFolder
 import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginSortOrder
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
-import java.lang.StringBuilder
 
 
 /** ZpdlStudioMediaPlugin */
@@ -159,7 +158,7 @@ class PluginImageQuery {
                 0
             }
 
-    fun getImageUri(id: Long): Uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+    private fun getImageUri(id: Long): Uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
 
     fun getImageThumbnail(id: Long, width: Int, height: Int): Bitmap? =
             this.context?.contentResolver?.loadThumbnail(
@@ -212,4 +211,12 @@ class PluginImageQuery {
             timeMs?.let {
                 it < modifyTimeMs
             } ?: true
+
+    fun getImageReadBytes(id: Long): ByteArray? {
+        this.context?.contentResolver?.openInputStream(getImageUri(id))?.use {
+            return it.readBytes()
+        }
+
+        return null
+    }
 }

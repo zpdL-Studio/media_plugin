@@ -4,7 +4,6 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import androidx.annotation.NonNull
 import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginBitmap
-import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginImageFile
 import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginSortOrder
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -103,6 +102,23 @@ class ZpdlStudioMediaPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                   result.success(null)
                 })
       }
+      PlatformMethod.READ_IMAGE_DATA -> {
+        Observable.fromCallable<ByteArray> {
+          if(call.arguments is String) {
+            (call.arguments as String).toLongOrNull()?.let {
+              return@fromCallable pluginMediaQuery.getImageReadBytes(it)
+            }
+          }
+          return@fromCallable null
+        }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                  result.success(it)
+                }, {
+                  result.success(null)
+                })
+      }
       PlatformMethod.CHECK_UPDATE -> {
         var timeMs: Long? = null
         if(call.arguments is Int) {
@@ -156,6 +172,8 @@ fun HashMap<*, *>?.getInt(key: Any): Int? {
   this[key]?.let {
     if(it is Number) {
       return it.toInt()
+    } else if(it is String) {
+      return it.toIntOrNull()
     }
   }
   return null
@@ -166,6 +184,8 @@ fun HashMap<*, *>?.getLong(key: Any): Long? {
   this[key]?.let {
     if(it is Number) {
       return it.toLong()
+    } else if(it is String) {
+      return it.toLongOrNull()
     }
   }
   return null

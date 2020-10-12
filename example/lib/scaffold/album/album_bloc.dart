@@ -6,6 +6,7 @@ import 'package:zpdl_studio_bloc/bloc/bloc.dart';
 import 'package:zpdl_studio_bloc/bloc/bloc_scaffold.dart';
 import 'package:zpdl_studio_media_plugin/plugin_data.dart';
 import 'package:zpdl_studio_media_plugin/zpdl_studio_media_plugin.dart';
+import 'package:zpdl_studio_media_plugin_example/scaffold/album_preview/album_preview_scaffold.dart';
 
 class AlbumBloc extends BLoCScaffold with BLoCLoading, BLoCLifeCycle, BLoCStreamSubscription {
   bool _init = false;
@@ -106,6 +107,26 @@ class AlbumBloc extends BLoCScaffold with BLoCLoading, BLoCLifeCycle, BLoCStream
 
       _folder.sink.add(folders);
       refreshFiles(currentFolderId);
+    }
+  }
+
+  void onTapImage(PluginImageFile image) async {
+    BuildContext context = buildContext;
+    if(context != null) {
+      String folderName = "";
+      final folders = await _folder.first;
+      for(final folder in folders) {
+        if(folder.selected) {
+          folderName = folder.folder.displayName;
+          break;
+        }
+      }
+      final images = await _files.first;
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  AlbumPreviewScaffold(folderName, image.id, images)));
     }
   }
 }

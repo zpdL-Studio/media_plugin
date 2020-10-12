@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'map_ext.dart';
 import 'dart:async';
 
@@ -42,7 +44,7 @@ class ZpdlStudioMediaPlugin {
     return list;
   }
 
-  static Future<PluginBitmap> getImageThumbnail(int id, {int width, int height}) async {
+  static Future<PluginBitmap> getImageThumbnail(String id, {int width, int height}) async {
     final results = await _channel.invokeMethod(PlatformMethod.GET_IMAGE_THUMBNAIL.method, {
       "id": id,
       if(width != null) "width": width,
@@ -51,6 +53,15 @@ class ZpdlStudioMediaPlugin {
 
     if(results is Map) {
       return PluginBitmap.map(results);
+    }
+    return null;
+  }
+
+  static Future<Uint8List> readImageData(String id) async {
+    final results = await _channel.invokeMethod(PlatformMethod.READ_IMAGE_DATA.method,id);
+
+    if(results is Uint8List) {
+      return results;
     }
     return null;
   }

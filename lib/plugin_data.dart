@@ -58,7 +58,7 @@ class PluginImageFolder {
 }
 
 class PluginImageFile {
-  final int id;
+  final String id;
   final String displayName;
   final int orientation;
   final int width;

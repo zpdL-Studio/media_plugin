@@ -59,9 +59,17 @@ class AlbumScaffold extends BLoCScaffoldProvider<AlbumBloc> {
                       crossAxisSpacing: bloc.itemSpace.toDouble(),
                     ),
                     itemBuilder: (context, index) {
-                      return PluginThumbnailWidget(
-                        image: data[index],
-                        boxFit: BoxFit.cover,
+                      return TouchWell(
+                        touchWellIsTop: true,
+                        onTap: () {
+                          bloc.onTapImage(data[index]);
+                        },
+                        child: PluginThumbnailWidget(
+                          width: double.infinity,
+                          height: double.infinity,
+                          image: data[index],
+                          boxFit: BoxFit.cover,
+                        ),
                       );
                     },
                     itemCount: data.length,
