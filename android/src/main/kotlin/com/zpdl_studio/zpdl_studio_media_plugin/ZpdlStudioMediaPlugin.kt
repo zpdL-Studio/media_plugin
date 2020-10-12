@@ -1,53 +1,177 @@
 package com.zpdl_studio.zpdl_studio_media_plugin
 
-import androidx.annotation.NonNull;
-
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import androidx.annotation.NonNull
+import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginBitmap
+import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginImageFile
+import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginSortOrder
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import io.flutter.plugin.common.PluginRegistry.Registrar
+import io.flutter.plugin.common.PluginRegistry
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 
 /** ZpdlStudioMediaPlugin */
-public class ZpdlStudioMediaPlugin: FlutterPlugin, MethodCallHandler {
+class ZpdlStudioMediaPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   /// The MethodChannel that will the communication between Flutter and native Android
   ///
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
   /// when the Flutter Engine is detached from the Activity
   private lateinit var channel : MethodChannel
+  private var activityPluginBinding: ActivityPluginBinding? = null
+  private var pluginPermission = PluginPermission(
+          { permission ->
+            activityPluginBinding?.activity?.let {
+              it.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
+            } ?: false
+          },
+          { requestCode, permissions ->
+            activityPluginBinding?.activity?.let {
+              it.requestPermissions(permissions, requestCode)
+              true
+            } ?: false
+          }
+  )
+  private val pluginMediaQuery = PluginImageQuery()
 
-  override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-    channel = MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "zpdl_studio_media_plugin")
-    channel.setMethodCallHandler(this);
+  private val requestPermissionsResultListener = PluginRegistry.RequestPermissionsResultListener { requestCode, permissions, grantResults ->
+    return@RequestPermissionsResultListener pluginPermission.onRequestPermissionsResult(requestCode, permissions, grantResults)
   }
 
-  // This static function is optional and equivalent to onAttachedToEngine. It supports the old
-  // pre-Flutter-1.12 Android projects. You are encouraged to continue supporting
-  // plugin registration via this function while apps migrate to use the new Android APIs
-  // post-flutter-1.12 via https://flutter.dev/go/android-project-migration.
-  //
-  // It is encouraged to share logic between onAttachedToEngine and registerWith to keep
-  // them functionally equivalent. Only one of onAttachedToEngine or registerWith will be called
-  // depending on the user's project. onAttachedToEngine or registerWith must both be defined
-  // in the same class.
-  companion object {
-    @JvmStatic
-    fun registerWith(registrar: Registrar) {
-      val channel = MethodChannel(registrar.messenger(), "zpdl_studio_media_plugin")
-      channel.setMethodCallHandler(ZpdlStudioMediaPlugin())
-    }
+  override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+    channel = MethodChannel(flutterPluginBinding.binaryMessenger, PluginConfig.CHANNEL_NAME)
+    channel.setMethodCallHandler(this)
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
-    if (call.method == "getPlatformVersion") {
-      result.success("Android ${android.os.Build.VERSION.RELEASE}")
-    } else {
-      result.notImplemented()
+    when(PlatformMethod.from(call.method)) {
+      PlatformMethod.GET_IMAGE_FOLDER -> {
+        pluginMediaQuery.getImageFolder(pluginPermission)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                  result.success(it.toMap())
+                }, {
+                  result.success(null)
+                })
+      }
+      PlatformMethod.GET_IMAGE_FILES -> {
+        Observable.fromCallable {
+          val map: HashMap<*, *> = call.arguments as? HashMap<*, *> ?: HashMap<Any, Any>()
+
+          pluginMediaQuery.getImageFileFromFolder(
+                  map.getString("id"),
+                  PluginSortOrder.from(map.getString("sortOrder")) ?: PluginSortOrder.DATE_DESC,
+                  map.getInt("limit"),
+          )
+        }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                  val list = mutableListOf<Map<String, *>>()
+                  for(pluginImageFile in it) {
+                    list.add(pluginImageFile.toMap())
+                  }
+                  result.success(list)
+                }, {
+                  result.success(null)
+                })
+      }
+      PlatformMethod.GET_IMAGE_THUMBNAIL -> {
+        Observable.fromCallable<Bitmap> {
+          val map: HashMap<*, *> = call.arguments as? HashMap<*, *> ?: HashMap<Any, Any>()
+
+          map.getLong("id")?.let {
+            pluginMediaQuery.getImageThumbnail(
+                    it,
+                    width = (map.getInt("width")) ?: 512,
+                    height = (map.getInt("height")) ?: 512
+            )
+          }
+        }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                  result.success(PluginBitmap.createARGB(it).toMap())
+                }, {
+                  result.success(null)
+                })
+      }
+      null -> result.notImplemented()
     }
   }
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
     channel.setMethodCallHandler(null)
   }
+
+  override fun onDetachedFromActivity() {
+    activityPluginBinding?.removeRequestPermissionsResultListener(requestPermissionsResultListener)
+    activityPluginBinding = null
+    pluginPermission.close()
+    pluginMediaQuery.close()
+  }
+
+  override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+    activityPluginBinding = binding
+    activityPluginBinding?.addRequestPermissionsResultListener(requestPermissionsResultListener)
+    activityPluginBinding?.activity?.let {
+      pluginMediaQuery.init(it)
+    }
+  }
+
+  override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+    activityPluginBinding = binding
+    activityPluginBinding?.addRequestPermissionsResultListener(requestPermissionsResultListener)
+    activityPluginBinding?.activity?.let {
+      pluginMediaQuery.init(it)
+    }
+  }
+
+  override fun onDetachedFromActivityForConfigChanges() {
+    activityPluginBinding?.removeRequestPermissionsResultListener(requestPermissionsResultListener)
+    activityPluginBinding = null
+    pluginPermission.close()
+    pluginMediaQuery.close()
+  }
 }
+
+fun HashMap<*, *>?.getInt(key: Any): Int? {
+  if(this == null) return null
+  this[key]?.let {
+    if(it is Number) {
+      return it.toInt()
+    }
+  }
+  return null
+}
+
+fun HashMap<*, *>?.getLong(key: Any): Long? {
+  if(this == null) return null
+  this[key]?.let {
+    if(it is Number) {
+      return it.toLong()
+    }
+  }
+  return null
+}
+
+fun HashMap<*, *>?.getString(key: Any): String? {
+  if(this == null) return null
+  this[key]?.let {
+    return if(it is String) {
+      it
+    } else {
+      it.toString()
+    }
+  }
+  return null
+}
+
+
