@@ -207,4 +207,9 @@ class PluginImageQuery {
         cursor?.close()
         return results
     }
+
+    fun checkUpdate(timeMs: Long?) =
+            timeMs?.let {
+                it < modifyTimeMs
+            } ?: true
 }

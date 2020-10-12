@@ -6,6 +6,7 @@ enum PlatformMethod {
   GET_IMAGE_FOLDER,
   GET_IMAGE_FILES,
   GET_IMAGE_THUMBNAIL,
+  CHECK_UPDATE,
 }
 
 extension PlatformMethodExtension on PlatformMethod {
@@ -20,6 +21,9 @@ extension PlatformMethodExtension on PlatformMethod {
         break;
       case PlatformMethod.GET_IMAGE_THUMBNAIL:
         _method = "${PluginConfig.CHANNEL_NAME}/GET_IMAGE_THUMBNAIL";
+        break;
+      case PlatformMethod.CHECK_UPDATE:
+        _method = "${PluginConfig.CHANNEL_NAME}/CHECK_UPDATE";
         break;
     }
 

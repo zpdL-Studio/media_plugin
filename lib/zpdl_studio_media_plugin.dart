@@ -54,4 +54,12 @@ class ZpdlStudioMediaPlugin {
     }
     return null;
   }
+
+  static Future<bool> checkUpdate(int timeMs) async {
+    final results = await _channel.invokeMethod(PlatformMethod.CHECK_UPDATE.method, timeMs);
+    if(results is bool) {
+      return results;
+    }
+    return true;
+  }
 }

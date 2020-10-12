@@ -103,6 +103,15 @@ class ZpdlStudioMediaPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                   result.success(null)
                 })
       }
+      PlatformMethod.CHECK_UPDATE -> {
+        var timeMs: Long? = null
+        if(call.arguments is Int) {
+          timeMs = (call.arguments as Int).toLong()
+        } else if(call.arguments is Long) {
+          timeMs = call.arguments as Long
+        }
+        result.success(pluginMediaQuery.checkUpdate(timeMs))
+      }
       null -> result.notImplemented()
     }
   }

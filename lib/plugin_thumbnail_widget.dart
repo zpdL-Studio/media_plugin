@@ -141,19 +141,23 @@ class _PluginThumbnailState extends State<PluginThumbnailWidget> {
       if(pluginBitmap != null) {
         ui.Image uiImage = await decodeImageFromPixels(pluginBitmap);
         if(uiImage != null) {
-          setState(() {
-            this._loadState = _LoadState.LOADED;
-            this._uiImage = uiImage;
-          });
+          if(mounted) {
+            setState(() {
+              this._loadState = _LoadState.LOADED;
+              this._uiImage = uiImage;
+            });
+          }
           return;
         }
       }
       throw Exception("Plugin Image Thumbnail load failed");
     } catch(e) {
-      setState(() {
-        this._loadState = _LoadState.ERROR;
-        this._exception = e;
-      });
+      if(mounted) {
+        setState(() {
+          this._loadState = _LoadState.ERROR;
+          this._exception = e;
+        });
+      }
     }
   }
 
@@ -269,18 +273,22 @@ class _PluginFolderThumbnailState extends State<PluginFolderThumbnailWidget> {
     try {
       List<PluginImageFile> list = await ZpdlStudioMediaPlugin.getImageFiles(_getFolderId(folder), limit: 1);
       if(list != null && list.isNotEmpty) {
-        setState(() {
-          this._loadState = _LoadState.LOADED;
-          this._file = list.first;
-        });
+        if(mounted) {
+          setState(() {
+            this._loadState = _LoadState.LOADED;
+            this._file = list.first;
+          });
+        }
       } else {
         throw Exception("Plugin Folder image files load failed");
       }
     } catch(e) {
-      setState(() {
-        this._loadState = _LoadState.ERROR;
-        this._exception = e;
-      });
+      if(mounted) {
+        setState(() {
+          this._loadState = _LoadState.ERROR;
+          this._exception = e;
+        });
+      }
     }
   }
 }

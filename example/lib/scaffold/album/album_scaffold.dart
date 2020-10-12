@@ -34,7 +34,9 @@ class AlbumScaffold extends BLoCScaffoldProvider<AlbumBloc> {
                     padding: EdgeInsets.symmetric(horizontal: 8),
                     scrollDirection: Axis.horizontal,
                     itemBuilder: (context, index) {
-                      return _buildFolder(data[index], bloc.itemWidth.toDouble());
+                      return _buildFolder(data[index], bloc.itemWidth.toDouble(), () {
+                        bloc.changeFolder(data[index]);
+                      });
                     },
                     itemCount: data.length,
                   ),
@@ -42,13 +44,37 @@ class AlbumScaffold extends BLoCScaffoldProvider<AlbumBloc> {
               );
             },
           ),
-          Expanded(flex: 1, child: Container(),)
+          Expanded(
+            flex: 1,
+            child: StreamBuilderToWidget(
+              stream: bloc.getFilesStream,
+              builder: (BuildContext context, List<PluginImageFile> data) {
+                return Container(
+                  padding: EdgeInsets.all(16),
+                  child: GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: bloc.itemRowCount,
+                      childAspectRatio: 1,
+                      mainAxisSpacing: bloc.itemSpace.toDouble(),
+                      crossAxisSpacing: bloc.itemSpace.toDouble(),
+                    ),
+                    itemBuilder: (context, index) {
+                      return PluginThumbnailWidget(
+                        image: data[index],
+                        boxFit: BoxFit.cover,
+                      );
+                    },
+                    itemCount: data.length,
+                  ),
+                );
+              },
+            ),)
         ],
       ),
     );
   }
 
-  Widget _buildFolder(AlbumFolder folder, double size) {
+  Widget _buildFolder(AlbumFolder folder, double size, GestureTapCallback onTap) {
     return Container(
       width: size,
       height: size,
@@ -58,9 +84,7 @@ class AlbumScaffold extends BLoCScaffoldProvider<AlbumBloc> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
         clipBehavior: Clip.hardEdge,
         child: TouchWell(
-          onTap: () {
-
-          },
+          onTap: onTap,
           touchWellIsTop: true,
           child: Stack(
             children: [
