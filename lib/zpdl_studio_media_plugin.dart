@@ -12,32 +12,32 @@ class ZpdlStudioMediaPlugin {
   static const MethodChannel _channel =
       const MethodChannel('zpdl_studio_media_plugin');
 
-  static Future<PluginDataSet<PluginImageFolder>> getImageFolder() async {
+  static Future<PluginDataSet<PluginFolder>> getImageFolder() async {
     final result = await _channel.invokeMethod(PlatformMethod.GET_IMAGE_FOLDER.method);
     if(result is Map) {
       return PluginDataSet(
         result.get("timeMs") ?? 0,
         result.get("permission") ?? false,
         result.getList("list", (map) {
-          return PluginImageFolder.map(map);
+          return PluginFolder.map(map);
         })
       );
     }
     return null;
   }
 
-  static Future<List<PluginImageFile>> getImageFiles(String id, {PluginSortOrder sortOrder, int limit}) async {
+  static Future<List<PluginImage>> getImageFiles(String id, {PluginSortOrder sortOrder, int limit}) async {
     final results = await _channel.invokeMethod(PlatformMethod.GET_IMAGE_FILES.method, {
       if(id != null) "id": id,
       if(sortOrder != null) "sortOrder": sortOrder.sortOrder,
       if(limit != null) "limit": limit
     });
 
-    List<PluginImageFile> list = List();
+    List<PluginImage> list = List();
     if(results is List) {
       for(final result in results) {
         if(result is Map) {
-          list.add(PluginImageFile.map(result));
+          list.add(PluginImage.map(result));
         }
       }
     }

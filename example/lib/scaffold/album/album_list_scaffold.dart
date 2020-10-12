@@ -5,27 +5,27 @@ import 'package:zpdl_studio_bloc/widget/touch_well.dart';
 import 'package:zpdl_studio_media_plugin/plugin_data.dart';
 import 'package:zpdl_studio_media_plugin/plugin_thumbnail_widget.dart';
 
-import 'album_bloc.dart';
+import 'album_list_bloc.dart';
 
-class AlbumScaffold extends BLoCScaffoldProvider<AlbumBloc> {
+class AlbumListScaffold extends BLoCScaffoldProvider<AlbumListBloc> {
 
-  AlbumScaffold({Key key}): super(key: key);
-
-  @override
-  AlbumBloc createBLoC() => AlbumBloc();
+  AlbumListScaffold({Key key}): super(key: key);
 
   @override
-  PreferredSizeWidget appBar(BuildContext context, AlbumBloc bloc) => AppBar(
+  AlbumListBloc createBLoC() => AlbumListBloc();
+
+  @override
+  PreferredSizeWidget appBar(BuildContext context, AlbumListBloc bloc) => AppBar(
         title: const Text('Album'),
       );
 
   @override
-  Widget body(BuildContext context, AlbumBloc bloc) {
+  Widget body(BuildContext context, AlbumListBloc bloc) {
     return SafeArea(
       child: Column(
         children: [
           StreamBuilderToWidget(
-            stream: bloc.getFolderStream,
+            stream: bloc.getFoldersStream,
             builder: (BuildContext context, List<AlbumFolder> data) {
               return Card(
                 child: Container(
@@ -47,8 +47,8 @@ class AlbumScaffold extends BLoCScaffoldProvider<AlbumBloc> {
           Expanded(
             flex: 1,
             child: StreamBuilderToWidget(
-              stream: bloc.getFilesStream,
-              builder: (BuildContext context, List<PluginImageFile> data) {
+              stream: bloc.getImagesStream,
+              builder: (BuildContext context, List<PluginImage> data) {
                 return Container(
                   padding: EdgeInsets.all(16),
                   child: GridView.builder(
@@ -101,7 +101,7 @@ class AlbumScaffold extends BLoCScaffoldProvider<AlbumBloc> {
                 width: size,
                 height: size,
                 boxFit: BoxFit.cover,
-                loadingBuilder: (BuildContext context, PluginImageFolder folder) {
+                loadingBuilder: (BuildContext context, PluginFolder folder) {
                   return Center(child: Text("Loading"),);
                 },
                 errorBuilder: (BuildContext context, Exception e) {

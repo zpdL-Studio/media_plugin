@@ -5,22 +5,22 @@ import 'package:flutter/material.dart';
 import 'package:zpdl_studio_media_plugin/plugin_data.dart';
 import 'package:zpdl_studio_media_plugin/zpdl_studio_media_plugin.dart';
 
-typedef PluginImageLoadingWidgetBuilder = Widget Function(
+typedef PluginThumbnailLoadingWidgetBuilder = Widget Function(
     BuildContext context,
-    PluginImageFile image,
+    PluginImage image,
     );
 
-typedef PluginImageFolderLoadingWidgetBuilder = Widget Function(
+typedef PluginFolderThumbnailLoadingWidgetBuilder = Widget Function(
     BuildContext context,
-    PluginImageFolder folder,
+    PluginFolder folder,
     );
 
-typedef PluginImageLoadedWidgetBuilder = Widget Function(
+typedef PluginThumbnailLoadedWidgetBuilder = Widget Function(
     BuildContext context,
     ui.Image image,
     );
 
-typedef PluginImageErrorWidgetBuilder = Widget Function(
+typedef PluginThumbnailErrorWidgetBuilder = Widget Function(
     BuildContext context,
     Exception error,
     );
@@ -33,16 +33,16 @@ enum _LoadState {
 
 class PluginThumbnailWidget extends StatefulWidget {
 
-  final PluginImageFile image;
+  final PluginImage image;
   final int thumbnailWidthPx;
   final int thumbnailHeightPx;
 
   final double width;
   final double height;
   final BoxFit boxFit;
-  final PluginImageLoadingWidgetBuilder loadingBuilder;
-  final PluginImageLoadedWidgetBuilder loadedBuilder;
-  final PluginImageErrorWidgetBuilder errorBuilder;
+  final PluginThumbnailLoadingWidgetBuilder loadingBuilder;
+  final PluginThumbnailLoadedWidgetBuilder loadedBuilder;
+  final PluginThumbnailErrorWidgetBuilder errorBuilder;
 
   const PluginThumbnailWidget({
     Key key,
@@ -64,7 +64,7 @@ class PluginThumbnailWidget extends StatefulWidget {
 
 class _PluginThumbnailState extends State<PluginThumbnailWidget> {
   _LoadState _loadState;
-  PluginImageFile _image;
+  PluginImage _image;
   ui.Image _uiImage;
   Exception _exception;
 
@@ -104,7 +104,7 @@ class _PluginThumbnailState extends State<PluginThumbnailWidget> {
     super.dispose();
   }
 
-  Widget _buildLoading(BuildContext context, PluginImageFile image,) {
+  Widget _buildLoading(BuildContext context, PluginImage image,) {
     return Container(
       width: widget.width,
       height: widget.height,
@@ -135,7 +135,7 @@ class _PluginThumbnailState extends State<PluginThumbnailWidget> {
     );
   }
 
-  Future<void> _loadAsync(PluginImageFile image) async {
+  Future<void> _loadAsync(PluginImage image) async {
     try {
       PluginBitmap pluginBitmap = await ZpdlStudioMediaPlugin.getImageThumbnail(image.id, width: widget.thumbnailWidthPx, height: widget.thumbnailHeightPx);
       if(pluginBitmap != null) {
@@ -176,15 +176,15 @@ class _PluginThumbnailState extends State<PluginThumbnailWidget> {
 }
 
 class PluginFolderThumbnailWidget extends StatefulWidget {
-  final PluginImageFolder folder;
+  final PluginFolder folder;
   final int thumbnailWidthPx;
   final int thumbnailHeightPx;
   final double width;
   final double height;
   final BoxFit boxFit;
-  final PluginImageFolderLoadingWidgetBuilder loadingBuilder;
-  final PluginImageLoadedWidgetBuilder loadedBuilder;
-  final PluginImageErrorWidgetBuilder errorBuilder;
+  final PluginFolderThumbnailLoadingWidgetBuilder loadingBuilder;
+  final PluginThumbnailLoadedWidgetBuilder loadedBuilder;
+  final PluginThumbnailErrorWidgetBuilder errorBuilder;
 
   const PluginFolderThumbnailWidget({Key key, this.folder, this.thumbnailWidthPx, this.thumbnailHeightPx, this.width, this.height, this.boxFit, this.loadingBuilder, this.loadedBuilder, this.errorBuilder}) : super(key: key);
 
@@ -195,8 +195,8 @@ class PluginFolderThumbnailWidget extends StatefulWidget {
 
 class _PluginFolderThumbnailState extends State<PluginFolderThumbnailWidget> {
   _LoadState _loadState;
-  PluginImageFolder _folder;
-  PluginImageFile _file;
+  PluginFolder _folder;
+  PluginImage _file;
   Exception _exception;
 
   @override
@@ -231,9 +231,9 @@ class _PluginFolderThumbnailState extends State<PluginFolderThumbnailWidget> {
     super.dispose();
   }
 
-  String _getFolderId(PluginImageFolder folder) => folder?.id ?? "";
+  String _getFolderId(PluginFolder folder) => folder?.id ?? "";
 
-  Widget _buildLoading(BuildContext context, PluginImageFolder folder,) {
+  Widget _buildLoading(BuildContext context, PluginFolder folder,) {
     return Container(
       width: widget.width,
       height: widget.height,
@@ -241,7 +241,7 @@ class _PluginFolderThumbnailState extends State<PluginFolderThumbnailWidget> {
     );
   }
 
-  Widget _buildLoaded(BuildContext context, PluginImageFolder folder, PluginImageFile image,) {
+  Widget _buildLoaded(BuildContext context, PluginFolder folder, PluginImage image,) {
     return image != null
         ? PluginThumbnailWidget(
       image: image,
@@ -250,7 +250,7 @@ class _PluginFolderThumbnailState extends State<PluginFolderThumbnailWidget> {
       width: widget.width,
       height: widget.height,
       boxFit: widget.boxFit,
-      loadingBuilder: widget.loadingBuilder != null ? (BuildContext context, PluginImageFile image) {
+      loadingBuilder: widget.loadingBuilder != null ? (BuildContext context, PluginImage image) {
         return widget.loadingBuilder(context, folder);
       } : null,
       loadedBuilder: widget.loadedBuilder,
@@ -269,9 +269,9 @@ class _PluginFolderThumbnailState extends State<PluginFolderThumbnailWidget> {
     );
   }
 
-  Future<void> _loadAsync(PluginImageFolder folder) async {
+  Future<void> _loadAsync(PluginFolder folder) async {
     try {
-      List<PluginImageFile> list = await ZpdlStudioMediaPlugin.getImageFiles(_getFolderId(folder), limit: 1);
+      List<PluginImage> list = await ZpdlStudioMediaPlugin.getImageFiles(_getFolderId(folder), limit: 1);
       if(list != null && list.isNotEmpty) {
         if(mounted) {
           setState(() {

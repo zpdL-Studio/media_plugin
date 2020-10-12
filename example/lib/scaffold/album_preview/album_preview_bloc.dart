@@ -9,7 +9,7 @@ class AlbumPreviewBLoC extends BLoCScaffold with BLoCLoading, BLoCStreamSubscrip
   String currentId;
 
   AlbumPreviewBLoC(
-      this.folderName, String currentId, List<PluginImageFile> list) {
+      this.folderName, String currentId, List<PluginImage> list) {
     _images.sink.add(list);
     int initPosition = 0;
     for(int i = 0; i < list.length; i++) {
@@ -24,11 +24,11 @@ class AlbumPreviewBLoC extends BLoCScaffold with BLoCLoading, BLoCStreamSubscrip
 
   final String folderName;
 
-  final _images = BehaviorSubject<List<PluginImageFile>>();
-  Stream<List<PluginImageFile>> get getImagesStream => _images.stream;
+  final _images = BehaviorSubject<List<PluginImage>>();
+  Stream<List<PluginImage>> get getImagesStream => _images.stream;
 
-  final _image = BehaviorSubject<PluginImageFile>();
-  Stream<PluginImageFile> get getImageStream => _image.stream;
+  final _image = BehaviorSubject<PluginImage>();
+  Stream<PluginImage> get getImageStream => _image.stream;
 
   @override
   void dispose() {

@@ -8,7 +8,7 @@ import 'package:zpdl_studio_media_plugin/plugin_data.dart';
 import 'package:zpdl_studio_media_plugin/zpdl_studio_media_plugin.dart';
 import 'package:zpdl_studio_media_plugin_example/scaffold/album_preview/album_preview_scaffold.dart';
 
-class AlbumBloc extends BLoCScaffold with BLoCLoading, BLoCLifeCycle, BLoCStreamSubscription {
+class AlbumListBloc extends BLoCScaffold with BLoCLoading, BLoCLifeCycle, BLoCStreamSubscription {
   bool _init = false;
 
   int itemRowCount = 4;
@@ -18,16 +18,16 @@ class AlbumBloc extends BLoCScaffold with BLoCLoading, BLoCLifeCycle, BLoCStream
   String currentFolderId;
   int updateTimeMs = 0;
 
-  final _folder = BehaviorSubject<List<AlbumFolder>>();
-  Stream<List<AlbumFolder>> get getFolderStream => _folder.stream;
+  final _folders = BehaviorSubject<List<AlbumFolder>>();
+  Stream<List<AlbumFolder>> get getFoldersStream => _folders.stream;
 
-  final _files = BehaviorSubject<List<PluginImageFile>>();
-  Stream<List<PluginImageFile>> get getFilesStream => _files.stream;
+  final _images = BehaviorSubject<List<PluginImage>>();
+  Stream<List<PluginImage>> get getImagesStream => _images.stream;
 
   @override
   void dispose() {
-    _folder.close();
-    _files.close();
+    _folders.close();
+    _images.close();
   }
 
   @override
@@ -50,7 +50,7 @@ class AlbumBloc extends BLoCScaffold with BLoCLoading, BLoCLifeCycle, BLoCStream
   }
 
   void refresh() {
-    streamSubscription<PluginDataSet<PluginImageFolder>>(
+    streamSubscription<PluginDataSet<PluginFolder>>(
         stream: Stream.fromFuture(ZpdlStudioMediaPlugin.getImageFolder()),
         onData: (data) {
           updateTimeMs = data.timeMs;
@@ -69,14 +69,14 @@ class AlbumBloc extends BLoCScaffold with BLoCLoading, BLoCLifeCycle, BLoCStream
           }
 
           final List<AlbumFolder> list = List();
-          list.add(AlbumFolder(PluginImageFolder(
+          list.add(AlbumFolder(PluginFolder(
             null, "All", count, updateTimeMs
           ), selected: this.currentFolderId == null));
           for(final folder in data.list) {
             list.add(AlbumFolder(folder, selected: currentFolderId == folder.id));
           }
 
-          _folder.sink.add(list);
+          _folders.sink.add(list);
           refreshFiles(currentFolderId);
         });
   }
@@ -85,10 +85,10 @@ class AlbumBloc extends BLoCScaffold with BLoCLoading, BLoCLifeCycle, BLoCStream
 
   void refreshFiles(String folderId) {
     filesStreamSubscription?.cancel();
-    filesStreamSubscription = streamSubscription<List<PluginImageFile>>(
+    filesStreamSubscription = streamSubscription<List<PluginImage>>(
         stream: Stream.fromFuture(ZpdlStudioMediaPlugin.getImageFiles(folderId)),
         onData: (data) {
-          _files.sink.add(data);
+          _images.sink.add(data);
         },
         onDone: (bool success) {
           filesStreamSubscription = null;
@@ -100,28 +100,28 @@ class AlbumBloc extends BLoCScaffold with BLoCLoading, BLoCLifeCycle, BLoCStream
     if(currentFolderId != folder.folder.id) {
       currentFolderId = folder.folder.id;
 
-      final folders = await _folder.first;
-      for(final item in folders) {
-        item.selected = currentFolderId == item.folder.id;
+      final folders = await _folders.first;
+      for(final folder in folders) {
+        folder.selected = currentFolderId == folder.folder.id;
       }
 
-      _folder.sink.add(folders);
+      _folders.sink.add(folders);
       refreshFiles(currentFolderId);
     }
   }
 
-  void onTapImage(PluginImageFile image) async {
+  void onTapImage(PluginImage image) async {
     BuildContext context = buildContext;
     if(context != null) {
       String folderName = "";
-      final folders = await _folder.first;
+      final folders = await _folders.first;
       for(final folder in folders) {
         if(folder.selected) {
           folderName = folder.folder.displayName;
           break;
         }
       }
-      final images = await _files.first;
+      final images = await _images.first;
       Navigator.push(
           context,
           MaterialPageRoute(
@@ -132,7 +132,7 @@ class AlbumBloc extends BLoCScaffold with BLoCLoading, BLoCLifeCycle, BLoCStream
 }
 
 class AlbumFolder {
-  final PluginImageFolder folder;
+  final PluginFolder folder;
   bool selected;
 
   AlbumFolder(this.folder, {bool selected}): this.selected = selected ?? false;

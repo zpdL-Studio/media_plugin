@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'map_ext.dart';
+import 'zpdl_studio_media_plugin.dart';
 
 class PluginDataSet<T> {
   final int timeMs;
@@ -36,15 +37,15 @@ extension PluginSortOrderExtension on PluginSortOrder {
   }
 }
 
-class PluginImageFolder {
+class PluginFolder {
   final String id;
   final String displayName;
   final int count;
   final int modifyTimeMs;
 
-  PluginImageFolder(this.id, this.displayName, this.count, this.modifyTimeMs);
+  PluginFolder(this.id, this.displayName, this.count, this.modifyTimeMs);
 
-  factory PluginImageFolder.map(Map map) => PluginImageFolder(
+  factory PluginFolder.map(Map map) => PluginFolder(
         map.get("id"),
         map.get("displayName") ?? "",
         map.get("count") ?? 0,
@@ -53,11 +54,11 @@ class PluginImageFolder {
 
   @override
   String toString() {
-    return 'PluginImageFolder{id: $id, displayName: $displayName, count: $count, modifyTimeMs: $modifyTimeMs}';
+    return 'PluginFolder{id: $id, displayName: $displayName, count: $count, modifyTimeMs: $modifyTimeMs}';
   }
 }
 
-class PluginImageFile {
+class PluginImage {
   final String id;
   final String displayName;
   final int orientation;
@@ -65,9 +66,9 @@ class PluginImageFile {
   final int height;
   final int modifyTimeMs;
 
-  PluginImageFile(this.id, this.displayName, this.orientation, this.width, this.height, this.modifyTimeMs);
+  PluginImage(this.id, this.displayName, this.orientation, this.width, this.height, this.modifyTimeMs);
 
-  factory PluginImageFile.map(Map map) => PluginImageFile(
+  factory PluginImage.map(Map map) => PluginImage(
         map.get("id"),
         map.get("displayName") ?? "",
         map.get("orientation") ?? 0,
@@ -78,8 +79,10 @@ class PluginImageFile {
 
   @override
   String toString() {
-    return 'PluginImageFile{id: $id, displayName: $displayName, orientation: $orientation, width: $width, height: $height, modifyTimeMs: $modifyTimeMs}';
+    return 'PluginImage{id: $id, displayName: $displayName, orientation: $orientation, width: $width, height: $height, modifyTimeMs: $modifyTimeMs}';
   }
+
+  Future<Uint8List> readImageData() => ZpdlStudioMediaPlugin.readImageData(id);
 }
 
 class PluginBitmap {

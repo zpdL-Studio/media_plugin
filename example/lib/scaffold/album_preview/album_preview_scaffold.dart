@@ -8,7 +8,7 @@ import 'package:zpdl_studio_media_plugin_example/scaffold/album_preview/album_pr
 class AlbumPreviewScaffold extends BLoCScaffoldProvider<AlbumPreviewBLoC> {
   final String folderName;
   final String currentId;
-  final List<PluginImageFile> list;
+  final List<PluginImage> list;
 
   AlbumPreviewScaffold(this.folderName, this.currentId, this.list, {Key key}): super(key: key);
 
@@ -29,7 +29,7 @@ class AlbumPreviewScaffold extends BLoCScaffoldProvider<AlbumPreviewBLoC> {
             flex: 1,
             child: StreamBuilderToWidget(
               stream: bloc.getImageStream,
-              builder: (BuildContext context, PluginImageFile data) {
+              builder: (BuildContext context, PluginImage data) {
                 return Container(
                   color: Colors.black,
                   child: Image(
