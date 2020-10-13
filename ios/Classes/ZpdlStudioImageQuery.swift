@@ -182,12 +182,14 @@ class ZpdlStudioImageQuery: NSObject, PHPhotoLibraryChangeObserver {
     func getImageThumbnail(_ id: String, _ width: Int, _ height: Int, _ completion: @escaping (PluginBitmap?) -> Void) {
         DispatchQueue.global(qos: .userInitiated).async {
             if let phAsset = self.fetchPHAsset(id) {
+                let option = PHImageRequestOptions()
+                option.deliveryMode = PHImageRequestOptionsDeliveryMode.highQualityFormat
                 self.imageManager.requestImage(
                     for: phAsset,
                     targetSize: CGSize(width: width, height: height),
                     contentMode: .aspectFit,
-                    options: nil,
-                    resultHandler: { (image: UIImage?, _) in
+                    options: option,
+                    resultHandler: { (image: UIImage?, info) in
                         let pluginBitmap = PluginBitmap.init(image)
                         DispatchQueue.main.async {
                             completion(pluginBitmap)
@@ -205,12 +207,14 @@ class ZpdlStudioImageQuery: NSObject, PHPhotoLibraryChangeObserver {
         DispatchQueue.global(qos: .userInitiated).async {
             if let phAsset = self.fetchPHAsset(id) {
                 phAsset.requestContentEditingInput(with: nil, completionHandler: { (contentEditingInput, dictInfo) in
-                    PHImageManager.default().requestImageDataAndOrientation(for: phAsset, options: nil) { (data: Data?, _, _, _) in
+                    PHImageManager.default().requestImageData(for: phAsset, options: nil) { (data: Data?, _, _, _) in
                         if let uniformTypeIdentifier = contentEditingInput?.uniformTypeIdentifier, uniformTypeIdentifier == kUTTypeJPEG as String || uniformTypeIdentifier == kUTTypePNG as String {
+                            print("KKH getImageReadBytes JPG id \(id) \(contentEditingInput?.uniformTypeIdentifier ?? "")")
                             DispatchQueue.main.async {
                                 completion(data)
                             }
                         } else if let imageData = data {
+                            print("KKH getImageReadBytes \(contentEditingInput?.uniformTypeIdentifier ?? "")")
                             let uiImage = UIImage(data: imageData)
                             let jpgData = uiImage?.jpegData(compressionQuality: 1.0)
                             DispatchQueue.main.async {
@@ -229,5 +233,9 @@ class ZpdlStudioImageQuery: NSObject, PHPhotoLibraryChangeObserver {
                 }
             }
         }
+    }
+    
+    func checkUpdate(_ timeMs: Int) -> Bool {
+        return timeMs < Int(modifyTimeMs * 1000)
     }
 }

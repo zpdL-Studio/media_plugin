@@ -43,14 +43,13 @@ public class SwiftZpdlStudioMediaPlugin: NSObject, FlutterPlugin {
                 height = getInt(arguments, "height")
             }
             if let id = _id {
-                ZpdlStudioImageQuery.shared.getImageThumbnail(id, width ?? 512, height ?? 512) { (bitmap: PluginBitmap?) in
+                ZpdlStudioImageQuery.shared.getImageThumbnail(id, width ?? 256, height ?? 256) { (bitmap: PluginBitmap?) in
                     result(bitmap?.pluginToMap())
                 }
             } else {
                 result(nil)
             }
         case .READ_IMAGE_DATA:
-            print("READ_IMAGE_DATA")
             if let id = call.arguments as? String {
                 ZpdlStudioImageQuery.shared.getImageReadBytes(id) { (data: Data?) in
                     result(data)
@@ -59,8 +58,11 @@ public class SwiftZpdlStudioMediaPlugin: NSObject, FlutterPlugin {
                 result(nil)
             }
         case .CHECK_UPDATE:
-            print("CHECK_UPDATE")
-            result(FlutterMethodNotImplemented)
+            if let timeMs = call.arguments as? Int {
+                result(ZpdlStudioImageQuery.shared.checkUpdate(timeMs))
+            } else {
+                result(true)
+            }
         }
     }
     
@@ -72,13 +74,13 @@ public class SwiftZpdlStudioMediaPlugin: NSObject, FlutterPlugin {
                     list.append(folder.pluginToMap())
                 }
                 result([
-                    "timeMs": Int(Date().timeIntervalSince1970),
+                    "timeMs": Int(Date().timeIntervalSince1970 * 1000),
                     "permission": true,
                     "list": list
                 ])
             } else {
                 result([
-                    "timeMs": Int(Date().timeIntervalSince1970),
+                    "timeMs": Int(Date().timeIntervalSince1970 * 1000),
                     "permission": permission
                 ])
             }
