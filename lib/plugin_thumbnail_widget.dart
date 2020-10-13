@@ -271,12 +271,12 @@ class _PluginFolderThumbnailState extends State<PluginFolderThumbnailWidget> {
 
   Future<void> _loadAsync(PluginFolder folder) async {
     try {
-      List<PluginImage> list = await ZpdlStudioMediaPlugin.getImageFiles(_getFolderId(folder), limit: 1);
-      if(list != null && list.isNotEmpty) {
+      PluginDataSet<PluginImage> dataSet = await ZpdlStudioMediaPlugin.getImages(_getFolderId(folder), limit: 1);
+      if(dataSet != null && dataSet.list.isNotEmpty) {
         if(mounted) {
           setState(() {
             this._loadState = _LoadState.LOADED;
-            this._file = list.first;
+            this._file = dataSet.list.first;
           });
         }
       } else {

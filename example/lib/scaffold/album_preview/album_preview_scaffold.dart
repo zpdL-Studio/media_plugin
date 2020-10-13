@@ -35,6 +35,11 @@ class AlbumPreviewScaffold extends BLoCScaffoldProvider<AlbumPreviewBLoC> {
                   child: Image(
                     image: PluginImageProvider(data.id),
                     fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Center(
+                        child: Text(error.toString(), style: TextStyle(color: Colors.red),),
+                      );
+                    },
                   ),
                 );
               },

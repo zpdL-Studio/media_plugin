@@ -55,7 +55,19 @@ class ZpdlStudioMediaPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         pluginMediaQuery.getImageFolder(pluginPermission)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                  result.success(it.toMap())
+                  result.success(it.pluginToMap())
+                }, {
+                  result.success(null)
+                })
+      }
+      PlatformMethod.GET_IMAGE_FOLDER_COUNT -> {
+        Observable.fromCallable {
+          pluginMediaQuery.getImageFolderCount(call.arguments as? String)
+        }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                  result.success(it)
                 }, {
                   result.success(null)
                 })
@@ -64,7 +76,8 @@ class ZpdlStudioMediaPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         Observable.fromCallable {
           val map: HashMap<*, *> = call.arguments as? HashMap<*, *> ?: HashMap<Any, Any>()
 
-          pluginMediaQuery.getImageFileFromFolder(
+          pluginMediaQuery.getImages(
+                  pluginPermission,
                   map.getString("id"),
                   PluginSortOrder.from(map.getString("sortOrder")) ?: PluginSortOrder.DATE_DESC,
                   map.getInt("limit"),
@@ -73,11 +86,7 @@ class ZpdlStudioMediaPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                  val list = mutableListOf<Map<String, *>>()
-                  for(pluginImageFile in it) {
-                    list.add(pluginImageFile.toMap())
-                  }
-                  result.success(list)
+                  result.success(it.pluginToMap())
                 }, {
                   result.success(null)
                 })
@@ -97,7 +106,7 @@ class ZpdlStudioMediaPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                  result.success(PluginBitmap.createARGB(it).toMap())
+                  result.success(PluginBitmap.createARGB(it).pluginToMap())
                 }, {
                   result.success(null)
                 })

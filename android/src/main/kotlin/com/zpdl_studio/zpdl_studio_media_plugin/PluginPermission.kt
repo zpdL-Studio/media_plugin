@@ -61,6 +61,15 @@ class PluginPermission(
         }
     }
 
+    fun checkSelfPermission(permissions: MutableList<String>): Boolean {
+        for(permission in permissions) {
+            if(!checkSelfPermission(permission)) {
+                return false
+            }
+        }
+        return true
+    }
+
     fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray): Boolean {
         var request: Request? = null
         for(i in requests.indices) {

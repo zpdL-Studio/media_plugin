@@ -1,6 +1,6 @@
 package com.zpdl_studio.zpdl_studio_media_plugin.data
 
-data class PluginImageFile(
+data class PluginImage(
         val id: Long,
         val displayName: String,
         val orientation: Int,
@@ -8,7 +8,7 @@ data class PluginImageFile(
         val height: Int,
         val modifyTimeMs: Long
 ) : PluginToMap {
-    override fun toMap(): Map<String, *> = hashMapOf(
+    override fun pluginToMap(): Map<String, *> = hashMapOf(
             "id" to id,
             "displayName" to displayName,
             "orientation" to orientation,

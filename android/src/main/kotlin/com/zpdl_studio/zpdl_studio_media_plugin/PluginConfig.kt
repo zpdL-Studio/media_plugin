@@ -8,6 +8,7 @@ class PluginConfig {
 
 enum class PlatformMethod(val method: String) {
   GET_IMAGE_FOLDER("${PluginConfig.CHANNEL_NAME}/GET_IMAGE_FOLDER"),
+  GET_IMAGE_FOLDER_COUNT("${PluginConfig.CHANNEL_NAME}/GET_IMAGE_FOLDER_COUNT"),
   GET_IMAGE_FILES("${PluginConfig.CHANNEL_NAME}/GET_IMAGE_FILES"),
   GET_IMAGE_THUMBNAIL("${PluginConfig.CHANNEL_NAME}/GET_IMAGE_THUMBNAIL"),
   READ_IMAGE_DATA("${PluginConfig.CHANNEL_NAME}/READ_IMAGE_DATA"),

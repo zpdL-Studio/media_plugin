@@ -41,37 +41,31 @@ class PluginFolder {
   final String id;
   final String displayName;
   final int count;
-  final int modifyTimeMs;
 
-  PluginFolder(this.id, this.displayName, this.count, this.modifyTimeMs);
+  PluginFolder(this.id, this.displayName, this.count);
 
   factory PluginFolder.map(Map map) => PluginFolder(
         map.get("id"),
         map.get("displayName") ?? "",
         map.get("count") ?? 0,
-        map.get("modifyTimeMs") ?? 0,
       );
 
   @override
   String toString() {
-    return 'PluginFolder{id: $id, displayName: $displayName, count: $count, modifyTimeMs: $modifyTimeMs}';
+    return 'PluginFolder{id: $id, displayName: $displayName, count: $count}';
   }
 }
 
 class PluginImage {
   final String id;
-  final String displayName;
-  final int orientation;
   final int width;
   final int height;
   final int modifyTimeMs;
 
-  PluginImage(this.id, this.displayName, this.orientation, this.width, this.height, this.modifyTimeMs);
+  PluginImage(this.id, this.width, this.height, this.modifyTimeMs);
 
   factory PluginImage.map(Map map) => PluginImage(
         map.get("id"),
-        map.get("displayName") ?? "",
-        map.get("orientation") ?? 0,
         map.get("width") ?? 0,
         map.get("height") ?? 0,
         map.get("modifyTimeMs") ?? 0,
@@ -79,7 +73,7 @@ class PluginImage {
 
   @override
   String toString() {
-    return 'PluginImage{id: $id, displayName: $displayName, orientation: $orientation, width: $width, height: $height, modifyTimeMs: $modifyTimeMs}';
+    return 'PluginImage{id: $id, width: $width, height: $height, modifyTimeMs: $modifyTimeMs}';
   }
 
   Future<Uint8List> readImageData() => ZpdlStudioMediaPlugin.readImageData(id);

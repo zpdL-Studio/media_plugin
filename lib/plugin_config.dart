@@ -4,6 +4,7 @@ class PluginConfig {
 
 enum PlatformMethod {
   GET_IMAGE_FOLDER,
+  GET_IMAGE_FOLDER_COUNT,
   GET_IMAGE_FILES,
   GET_IMAGE_THUMBNAIL,
   READ_IMAGE_DATA,
@@ -16,6 +17,9 @@ extension PlatformMethodExtension on PlatformMethod {
     switch(this) {
       case PlatformMethod.GET_IMAGE_FOLDER:
         _method = "${PluginConfig.CHANNEL_NAME}/GET_IMAGE_FOLDER";
+        break;
+      case PlatformMethod.GET_IMAGE_FOLDER_COUNT:
+        _method = "${PluginConfig.CHANNEL_NAME}/GET_IMAGE_FOLDER_COUNT";
         break;
       case PlatformMethod.GET_IMAGE_FILES:
         _method = "${PluginConfig.CHANNEL_NAME}/GET_IMAGE_FILES";

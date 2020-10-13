@@ -69,6 +69,9 @@ class AlbumListScaffold extends BLoCScaffoldProvider<AlbumListBloc> {
                           height: double.infinity,
                           image: data[index],
                           boxFit: BoxFit.cover,
+                          errorBuilder: (BuildContext context, Exception e) {
+                            return Center(child: Text(e.toString()),);
+                          },
                         ),
                       );
                     },

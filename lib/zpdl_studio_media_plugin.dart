@@ -26,22 +26,31 @@ class ZpdlStudioMediaPlugin {
     return null;
   }
 
-  static Future<List<PluginImage>> getImageFiles(String id, {PluginSortOrder sortOrder, int limit}) async {
-    final results = await _channel.invokeMethod(PlatformMethod.GET_IMAGE_FILES.method, {
+  static Future<int> getImageFolderCount(String id) async {
+    final result = await _channel.invokeMethod(PlatformMethod.GET_IMAGE_FOLDER_COUNT.method, id);
+    if(result is int) {
+      return result;
+    }
+    return null;
+  }
+
+  static Future<PluginDataSet<PluginImage>> getImages(String id, {PluginSortOrder sortOrder, int limit}) async {
+    final result = await _channel.invokeMethod(PlatformMethod.GET_IMAGE_FILES.method, {
       if(id != null) "id": id,
       if(sortOrder != null) "sortOrder": sortOrder.sortOrder,
       if(limit != null) "limit": limit
     });
 
-    List<PluginImage> list = List();
-    if(results is List) {
-      for(final result in results) {
-        if(result is Map) {
-          list.add(PluginImage.map(result));
-        }
-      }
+    if(result is Map) {
+      return PluginDataSet(
+          result.get("timeMs") ?? 0,
+          result.get("permission") ?? false,
+          result.getList("list", (map) {
+            return PluginImage.map(map);
+          })
+      );
     }
-    return list;
+    return null;
   }
 
   static Future<PluginBitmap> getImageThumbnail(String id, {int width, int height}) async {

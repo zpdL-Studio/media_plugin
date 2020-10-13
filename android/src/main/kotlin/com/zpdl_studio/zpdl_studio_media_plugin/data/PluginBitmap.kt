@@ -10,7 +10,7 @@ data class PluginBitmap(
         val height: Int,
         val buffer: ByteBuffer
 ) : PluginToMap {
-    override fun toMap(): Map<String, *> = hashMapOf(
+    override fun pluginToMap(): Map<String, *> = hashMapOf(
             "width" to width,
             "height" to height,
             "buffer" to buffer.array(),

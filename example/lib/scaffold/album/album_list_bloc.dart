@@ -52,15 +52,14 @@ class AlbumListBloc extends BLoCScaffold with BLoCLoading, BLoCLifeCycle, BLoCSt
   void refresh() {
     streamSubscription<PluginDataSet<PluginFolder>>(
         stream: Stream.fromFuture(ZpdlStudioMediaPlugin.getImageFolder()),
-        onData: (data) {
+        onData: (data) async {
           updateTimeMs = data.timeMs;
           bool foundCurrentFolder = false;
-          int count = 0;
 
           for(final folder in data.list) {
-            count += folder.count;
             if(!foundCurrentFolder && folder.id == currentFolderId) {
               foundCurrentFolder = true;
+              break;
             }
           }
 
@@ -70,12 +69,13 @@ class AlbumListBloc extends BLoCScaffold with BLoCLoading, BLoCLifeCycle, BLoCSt
 
           final List<AlbumFolder> list = List();
           list.add(AlbumFolder(PluginFolder(
-            null, "All", count, updateTimeMs
+            null, "All", await ZpdlStudioMediaPlugin.getImageFolderCount(null)
           ), selected: this.currentFolderId == null));
           for(final folder in data.list) {
             list.add(AlbumFolder(folder, selected: currentFolderId == folder.id));
           }
 
+          // _folders.sink.add([list.first]);
           _folders.sink.add(list);
           refreshFiles(currentFolderId);
         });
@@ -85,10 +85,10 @@ class AlbumListBloc extends BLoCScaffold with BLoCLoading, BLoCLifeCycle, BLoCSt
 
   void refreshFiles(String folderId) {
     filesStreamSubscription?.cancel();
-    filesStreamSubscription = streamSubscription<List<PluginImage>>(
-        stream: Stream.fromFuture(ZpdlStudioMediaPlugin.getImageFiles(folderId)),
+    filesStreamSubscription = streamSubscription<PluginDataSet<PluginImage>>(
+        stream: Stream.fromFuture(ZpdlStudioMediaPlugin.getImages(folderId)),
         onData: (data) {
-          _images.sink.add(data);
+          _images.sink.add(data.list);
         },
         onDone: (bool success) {
           filesStreamSubscription = null;

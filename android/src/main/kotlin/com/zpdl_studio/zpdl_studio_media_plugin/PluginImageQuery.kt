@@ -11,8 +11,8 @@ import android.os.Looper
 import android.provider.MediaStore
 import android.util.Size
 import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginDataSet
-import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginImageFile
-import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginImageFolder
+import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginImage
+import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginFolder
 import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginSortOrder
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
@@ -24,6 +24,8 @@ class PluginImageQuery {
     private var context: Context? = null
     private var contentObserver: ContentObserver? = null
     private var modifyTimeMs: Long = 0L
+
+    private val permissions = mutableListOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
     fun init(context: Context) {
         this.context = context
@@ -75,8 +77,39 @@ class PluginImageQuery {
         return sb.toString()
     }
 
-    fun getImageFolder(pluginPermission: PluginPermission): Observable<PluginDataSet<PluginImageFolder>> =
-            pluginPermission.requestPermissionsObservable(mutableListOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)).flatMap {
+    fun getImageFolderCount(bucketId: String?): Int = context?.let {
+        getImageFolderCount(it, bucketId)
+    } ?: 0
+
+    private fun getImageFolderCount(context: Context, bucketId: String?): Int =
+            try {
+                if(bucketId != null && bucketId.isNotEmpty()) {
+                    val cursor = context.contentResolver.query(
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                            null,
+                            MediaStore.Video.Media.BUCKET_ID + "=?",
+                            arrayOf(bucketId),
+                            null)
+                    val count: Int = cursor?.count ?: 0
+                    cursor?.close()
+                    count
+                } else {
+                    val cursor = context.contentResolver.query(
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                            null,
+                            null,
+                            null,
+                            null)
+                    val count: Int = cursor?.count ?: 0
+                    cursor?.close()
+                    count
+                }
+            } catch (e: Exception) {
+                0
+            }
+
+    fun getImageFolder(pluginPermission: PluginPermission): Observable<PluginDataSet<PluginFolder>> =
+            pluginPermission.requestPermissionsObservable(permissions).flatMap {
                 if (it) {
                     Observable.fromCallable {
                         PluginDataSet(list = getImageFolder())
@@ -86,19 +119,14 @@ class PluginImageQuery {
                 }
             }
 
-    private fun getImageFolder(): MutableList<PluginImageFolder> {
-        val results: HashMap<String, PluginImageFolder> = HashMap()
+    private fun getImageFolder(): MutableList<PluginFolder> {
+        val results: HashMap<String, PluginFolder> = HashMap()
         context?.let { context ->
             val cursor = context.contentResolver.query(
                     MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                     arrayOf(
                             MediaStore.Images.Media.BUCKET_ID,
                             MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
-//                            MediaStore.Images.Media._ID,
-//                            MediaStore.Images.Media.DISPLAY_NAME,
-//                            MediaStore.Images.Media.ORIENTATION,
-//                            MediaStore.Images.Media.WIDTH,
-//                            MediaStore.Images.Media.HEIGHT,
                             MediaStore.Images.Media.DATE_MODIFIED
                     ),
                     null,
@@ -108,33 +136,18 @@ class PluginImageQuery {
             cursor?.let { _cursor ->
                 val columnIndexBucketId = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_ID)
                 val columnIndexBucketDisplayName = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME)
-//                val columnIndexID = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
-//                val columnIndexName = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
-//                val columnIndexOrientation = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.ORIENTATION)
-//                val columnIndexWidth = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH)
-//                val columnIndexHeight = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT)
                 val columnIndexDateModified = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_MODIFIED)
 
                 while (_cursor.moveToNext()) {
                     val bucketId = cursor.getString(columnIndexBucketId)
                     if(!results.contains(bucketId)) {
-                        results[bucketId] = PluginImageFolder(
+                        results[bucketId] = PluginFolder(
                                 id = bucketId,
                                 displayName = cursor.getString(columnIndexBucketDisplayName),
                                 count = getImageFolderCount(context, bucketId),
                                 modifyTimeMs = cursor.getLong(columnIndexDateModified) * 1000
                         )
                     }
-//                    Log.i("KKH", "BUCKET_ID : ${cursor.getLong(columnIndexBucketId)} BUCKET_DISPLAY_NAME : ${cursor.getString(columnIndexBucketDisplayName)} DISPLAY_NAME : ${cursor.getString(columnIndexName)}")
-//                    result.add(MediaImageData(
-//                            id = cursor.getLong(columnIndexID),
-//                            path = cursor.getString(columnIndexData) ?: "",
-//                            displayName = cursor.getString(columnIndexName) ?: "",
-//                            orientation = cursor.getInt(columnIndexOrientation),
-//                            width = cursor.getInt(columnIndexWidth),
-//                            height = cursor.getInt(columnIndexHeight),
-//                            modifyTimeMs = cursor.getLong(columnIndexDateModified) * 1000
-//                    ))
                 }
             }
             cursor?.close()
@@ -142,21 +155,6 @@ class PluginImageQuery {
 
         return results.values.sortedByDescending { it.modifyTimeMs }.toMutableList()
     }
-
-    private fun getImageFolderCount(context: Context, bucketId: String): Int =
-            try {
-                val cursor = context.contentResolver.query(
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                        null,
-                        MediaStore.Video.Media.BUCKET_ID + "=?",
-                        arrayOf(bucketId),
-                        null)
-                val count: Int = cursor?.count ?: 0
-                cursor?.close()
-                count
-            } catch (e: Exception) {
-                0
-            }
 
     private fun getImageUri(id: Long): Uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
 
@@ -167,8 +165,12 @@ class PluginImageQuery {
                     null
             )
 
-    fun getImageFileFromFolder(bucketId: String?, sortOrder: PluginSortOrder = PluginSortOrder.DATE_DESC, limit: Int? = null): MutableList<PluginImageFile> {
-        val results = mutableListOf<PluginImageFile>()
+    fun getImages(pluginPermission: PluginPermission, bucketId: String?, sortOrder: PluginSortOrder = PluginSortOrder.DATE_DESC, limit: Int? = null): PluginDataSet<PluginImage> {
+        val results = mutableListOf<PluginImage>()
+        if(!pluginPermission.checkSelfPermission(permissions)) {
+            return PluginDataSet(permission = false, list = results)
+        }
+
         val id: String? = bucketId?.let { if(it.isNotEmpty()) it else null }
         val cursor = context?.contentResolver?.query(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
@@ -193,7 +195,7 @@ class PluginImageQuery {
             val columnIndexDateModified = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_MODIFIED)
 
             while (_cursor.moveToNext()) {
-                results.add(PluginImageFile(
+                results.add(PluginImage(
                         id = cursor.getLong(columnIndexID),
                         displayName = cursor.getString(columnIndexName) ?: "",
                         orientation = cursor.getInt(columnIndexOrientation),
@@ -204,7 +206,7 @@ class PluginImageQuery {
             }
         }
         cursor?.close()
-        return results
+        return PluginDataSet(list = results)
     }
 
     fun checkUpdate(timeMs: Long?) =
