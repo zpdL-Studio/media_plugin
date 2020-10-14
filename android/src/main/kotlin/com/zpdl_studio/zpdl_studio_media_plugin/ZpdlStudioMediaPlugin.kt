@@ -1,10 +1,13 @@
 package com.zpdl_studio.zpdl_studio_media_plugin
 
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
+import android.os.Build
 import androidx.annotation.NonNull
 import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginBitmap
 import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginSortOrder
+import com.zpdl_studio.zpdl_studio_media_plugin.media_query.PluginImageQuery
+import com.zpdl_studio.zpdl_studio_media_plugin.media_query.PluginImageQueryM
+import com.zpdl_studio.zpdl_studio_media_plugin.media_query.PluginImageQueryQ
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -38,7 +41,7 @@ class ZpdlStudioMediaPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             } ?: false
           }
   )
-  private val pluginMediaQuery = PluginImageQuery()
+  private val pluginMediaQuery: PluginImageQuery = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) PluginImageQueryQ() else PluginImageQueryM()
 
   private val requestPermissionsResultListener = PluginRegistry.RequestPermissionsResultListener { requestCode, permissions, grantResults ->
     return@RequestPermissionsResultListener pluginPermission.onRequestPermissionsResult(requestCode, permissions, grantResults)
@@ -73,40 +76,41 @@ class ZpdlStudioMediaPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                 })
       }
       PlatformMethod.GET_IMAGE_FILES -> {
-        Observable.fromCallable {
-          val map: HashMap<*, *> = call.arguments as? HashMap<*, *> ?: HashMap<Any, Any>()
-
-          pluginMediaQuery.getImages(
-                  pluginPermission,
-                  map.getString("id"),
-                  PluginSortOrder.from(map.getString("sortOrder")) ?: PluginSortOrder.DATE_DESC,
-                  map.getInt("limit"),
-          )
-        }
+        val map: HashMap<*, *> = call.arguments as? HashMap<*, *> ?: HashMap<Any, Any>()
+        pluginMediaQuery.getImages(
+                pluginPermission,
+                map.getString("id"),
+                PluginSortOrder.from(map.getString("sortOrder")) ?: PluginSortOrder.DATE_DESC,
+                map.getInt("limit"),
+        )
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
                   result.success(it.pluginToMap())
                 }, {
+                  it.printStackTrace()
                   result.success(null)
                 })
       }
       PlatformMethod.GET_IMAGE_THUMBNAIL -> {
-        Observable.fromCallable<Bitmap> {
+        Observable.fromCallable<PluginBitmap> {
           val map: HashMap<*, *> = call.arguments as? HashMap<*, *> ?: HashMap<Any, Any>()
 
-          map.getLong("id")?.let {
+          val bitmap = map.getLong("id")?.let {
             pluginMediaQuery.getImageThumbnail(
                     it,
-                    width = (map.getInt("width")) ?: 512,
-                    height = (map.getInt("height")) ?: 512
+                    width = (map.getInt("width")) ?: 256,
+                    height = (map.getInt("height")) ?: 256
             )
+          }
+          bitmap?.let {
+            PluginBitmap.createARGB(it)
           }
         }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                  result.success(PluginBitmap.createARGB(it).pluginToMap())
+                  result.success(it.pluginToMap())
                 }, {
                   result.success(null)
                 })

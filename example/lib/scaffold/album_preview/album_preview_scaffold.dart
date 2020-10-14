@@ -32,6 +32,7 @@ class AlbumPreviewScaffold extends BLoCScaffoldProvider<AlbumPreviewBLoC> {
               builder: (BuildContext context, PluginImage data) {
                 return Container(
                   color: Colors.black,
+                  alignment: AlignmentDirectional.center,
                   child: Image(
                     image: PluginImageProvider(data.id),
                     fit: BoxFit.contain,

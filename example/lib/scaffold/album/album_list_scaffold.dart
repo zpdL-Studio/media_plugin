@@ -68,7 +68,7 @@ class AlbumListScaffold extends BLoCScaffoldProvider<AlbumListBloc> {
                           width: double.infinity,
                           height: double.infinity,
                           image: data[index],
-                          boxFit: BoxFit.cover,
+                          boxFit: BoxFit.contain,
                           errorBuilder: (BuildContext context, Exception e) {
                             return Center(child: Text(e.toString()),);
                           },
@@ -119,21 +119,23 @@ class AlbumListScaffold extends BLoCScaffoldProvider<AlbumListBloc> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      folder.folder.displayName,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 3,
-                      style: folder.selected
-                          ? TextStyle(
-                          fontSize: 14,
-                          color: Colors.yellow,
-                          fontWeight: FontWeight.bold)
-                          : TextStyle(
-                          fontSize: 12,
-                          color: Colors.white,
-                          fontWeight: FontWeight.normal),
+                    Expanded(
+                      flex: 1,
+                      child: Text(
+                        folder.folder.displayName,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 3,
+                        style: folder.selected
+                            ? TextStyle(
+                            fontSize: 14,
+                            color: Colors.yellow,
+                            fontWeight: FontWeight.bold)
+                            : TextStyle(
+                            fontSize: 12,
+                            color: Colors.white,
+                            fontWeight: FontWeight.normal),
+                      ),
                     ),
-                    Spacer(flex: 1,),
                     Row(
                       children: [
                         Spacer(flex: 1,),
