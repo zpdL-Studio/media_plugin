@@ -15,6 +15,11 @@ typedef PluginFolderThumbnailLoadingWidgetBuilder = Widget Function(
     PluginFolder folder,
     );
 
+typedef PluginFolderThumbnailEmptyWidgetBuilder = Widget Function(
+    BuildContext context,
+    PluginFolder folder,
+    );
+
 typedef PluginThumbnailLoadedWidgetBuilder = Widget Function(
     BuildContext context,
     ui.Image image,
@@ -184,9 +189,10 @@ class PluginFolderThumbnailWidget extends StatefulWidget {
   final BoxFit boxFit;
   final PluginFolderThumbnailLoadingWidgetBuilder loadingBuilder;
   final PluginThumbnailLoadedWidgetBuilder loadedBuilder;
+  final PluginFolderThumbnailEmptyWidgetBuilder emptyBuilder;
   final PluginThumbnailErrorWidgetBuilder errorBuilder;
 
-  const PluginFolderThumbnailWidget({Key key, this.folder, this.thumbnailWidthPx, this.thumbnailHeightPx, this.width, this.height, this.boxFit, this.loadingBuilder, this.loadedBuilder, this.errorBuilder}) : super(key: key);
+  const PluginFolderThumbnailWidget({Key key, this.folder, this.thumbnailWidthPx, this.thumbnailHeightPx, this.width, this.height, this.boxFit, this.loadingBuilder, this.loadedBuilder, this.emptyBuilder, this.errorBuilder}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _PluginFolderThumbnailState();
@@ -212,6 +218,9 @@ class _PluginFolderThumbnailState extends State<PluginFolderThumbnailWidget> {
       case _LoadState.LOADING:
         return _buildLoading(context, widget.folder);
       case _LoadState.LOADED:
+        if(_file == null) {
+          return _buildEmpty(context, _folder);
+        }
         return _buildLoaded(context, _folder, _file);
       case _LoadState.ERROR:
         return _buildError(context, _exception);
@@ -261,6 +270,14 @@ class _PluginFolderThumbnailState extends State<PluginFolderThumbnailWidget> {
     );
   }
 
+  Widget _buildEmpty(BuildContext context, PluginFolder folder,) {
+    return Container(
+      width: widget.width,
+      height: widget.height,
+      child: widget.emptyBuilder != null ? widget.emptyBuilder(context, folder) : null,
+    );
+  }
+
   Widget _buildError(BuildContext context, Exception e,) {
     return Container(
       width: widget.width,
@@ -272,11 +289,11 @@ class _PluginFolderThumbnailState extends State<PluginFolderThumbnailWidget> {
   Future<void> _loadAsync(PluginFolder folder) async {
     try {
       PluginDataSet<PluginImage> dataSet = await ZpdlStudioMediaPlugin.getImages(_getFolderId(folder), limit: 1);
-      if(dataSet != null && dataSet.list.isNotEmpty) {
+      if(dataSet != null) {
         if(mounted) {
           setState(() {
             this._loadState = _LoadState.LOADED;
-            this._file = dataSet.list.first;
+            this._file = dataSet.list.isNotEmpty ? dataSet.list.first : null;
           });
         }
       } else {

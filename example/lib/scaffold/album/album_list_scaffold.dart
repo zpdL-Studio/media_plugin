@@ -3,7 +3,7 @@ import 'package:zpdl_studio_bloc/bloc/bloc_scaffold.dart';
 import 'package:zpdl_studio_bloc/widget/stream_builder_to_widget.dart';
 import 'package:zpdl_studio_bloc/widget/touch_well.dart';
 import 'package:zpdl_studio_media_plugin/plugin_data.dart';
-import 'package:zpdl_studio_media_plugin/plugin_thumbnail_widget.dart';
+import 'package:zpdl_studio_media_plugin/widget/plugin_thumbnail_widget.dart';
 
 import 'album_list_bloc.dart';
 
@@ -106,6 +106,9 @@ class AlbumListScaffold extends BLoCScaffoldProvider<AlbumListBloc> {
                 boxFit: BoxFit.cover,
                 loadingBuilder: (BuildContext context, PluginFolder folder) {
                   return Center(child: Text("Loading"),);
+                },
+                emptyBuilder: (BuildContext context, PluginFolder folder) {
+                  return Center(child: Text(folder.displayName),);
                 },
                 errorBuilder: (BuildContext context, Exception e) {
                   return Center(child: Text(e.toString()),);

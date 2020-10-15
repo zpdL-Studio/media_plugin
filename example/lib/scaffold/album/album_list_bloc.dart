@@ -31,7 +31,12 @@ class AlbumListBloc extends BLoCScaffold with BLoCLifeCycle {
   }
 
   @override
-  void onLifeCycleResume(BuildContext context) async {
+  void onLifeCycleResume() async {
+    BuildContext context = buildContext;
+    if(context == null) {
+      return;
+    }
+
     if(!_init) {
       _init = true;
       double width = MediaQuery.of(context)?.size?.width ?? 360;
@@ -45,7 +50,7 @@ class AlbumListBloc extends BLoCScaffold with BLoCLifeCycle {
   }
 
   @override
-  void onLifeCyclePause(BuildContext context) {
+  void onLifeCyclePause() {
 
   }
 
