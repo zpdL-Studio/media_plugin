@@ -10,7 +10,7 @@ class AlbumPreviewScaffold extends BLoCScaffoldProvider<AlbumPreviewBLoC> {
   final String currentId;
   final List<PluginImage> list;
 
-  AlbumPreviewScaffold(this.folderName, this.currentId, this.list, {Key key}): super(key: key);
+  AlbumPreviewScaffold(this.folderName, this.currentId, this.list, {Key key}): super(key: key, bodyColor: Colors.black);
 
   @override
   AlbumPreviewBLoC createBLoC() => AlbumPreviewBLoC(folderName, currentId, list);

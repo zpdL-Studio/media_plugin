@@ -5,7 +5,7 @@ import 'package:zpdl_studio_bloc/bloc/bloc.dart';
 import 'package:zpdl_studio_bloc/bloc/bloc_scaffold.dart';
 import 'package:zpdl_studio_media_plugin/plugin_data.dart';
 
-class AlbumPreviewBLoC extends BLoCScaffold with BLoCLoading, BLoCStreamSubscription {
+class AlbumPreviewBLoC extends BLoCScaffold with BLoCParent {
   String currentId;
 
   AlbumPreviewBLoC(

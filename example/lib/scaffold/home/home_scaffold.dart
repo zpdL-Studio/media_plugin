@@ -3,14 +3,10 @@ import 'package:zpdl_studio_bloc/bloc/bloc.dart';
 import 'package:zpdl_studio_bloc/bloc/bloc_scaffold.dart';
 import 'package:zpdl_studio_media_plugin_example/scaffold/album/album_list_scaffold.dart';
 
-class _Bloc extends BLoCScaffold with BLoCLoading {
+class _Bloc extends BLoC {
 
   @override
   void dispose() {
-
-  }
-
-  void showLoading() {
 
   }
 }

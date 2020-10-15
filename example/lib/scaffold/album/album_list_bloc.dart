@@ -8,7 +8,7 @@ import 'package:zpdl_studio_media_plugin/plugin_data.dart';
 import 'package:zpdl_studio_media_plugin/zpdl_studio_media_plugin.dart';
 import 'package:zpdl_studio_media_plugin_example/scaffold/album_preview/album_preview_scaffold.dart';
 
-class AlbumListBloc extends BLoCScaffold with BLoCLoading, BLoCLifeCycle, BLoCStreamSubscription {
+class AlbumListBloc extends BLoCScaffold with BLoCLifeCycle {
   bool _init = false;
 
   int itemRowCount = 4;
@@ -50,7 +50,7 @@ class AlbumListBloc extends BLoCScaffold with BLoCLoading, BLoCLifeCycle, BLoCSt
   }
 
   void refresh() {
-    streamSubscription<PluginDataSet<PluginFolder>>(
+    scaffoldSubscription<PluginDataSet<PluginFolder>>(
         stream: Stream.fromFuture(ZpdlStudioMediaPlugin.getImageFolder()),
         onData: (data) async {
           updateTimeMs = data.timeMs;
@@ -85,7 +85,7 @@ class AlbumListBloc extends BLoCScaffold with BLoCLoading, BLoCLifeCycle, BLoCSt
 
   void refreshFiles(String folderId) {
     filesStreamSubscription?.cancel();
-    filesStreamSubscription = streamSubscription<PluginDataSet<PluginImage>>(
+    filesStreamSubscription = scaffoldSubscription<PluginDataSet<PluginImage>>(
         stream: Stream.fromFuture(ZpdlStudioMediaPlugin.getImages(folderId)),
         onData: (data) {
           _images.sink.add(data.list);

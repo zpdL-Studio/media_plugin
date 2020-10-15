@@ -77,6 +77,20 @@ class PluginImage {
   }
 
   Future<Uint8List> readImageData() => ZpdlStudioMediaPlugin.readImageData(id);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PluginImage &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          width == other.width &&
+          height == other.height &&
+          modifyTimeMs == other.modifyTimeMs;
+
+  @override
+  int get hashCode =>
+      id.hashCode ^ width.hashCode ^ height.hashCode ^ modifyTimeMs.hashCode;
 }
 
 class PluginBitmap {
