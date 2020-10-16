@@ -9,10 +9,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
 import com.zpdl_studio.zpdl_studio_media_plugin.PluginPermission
-import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginDataSet
-import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginFolder
-import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginImage
-import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginSortOrder
+import com.zpdl_studio.zpdl_studio_media_plugin.data.*
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 
@@ -95,4 +92,6 @@ abstract class PluginImageQuery {
     abstract fun getImages(bucketId: String?, sortOrder: PluginSortOrder, limit: Int? = null): PluginDataSet<PluginImage>
 
     abstract fun getImageThumbnail(id: Long, width: Int, height: Int): Bitmap?
+
+    abstract fun getImageInfo(id: Long): PluginImageInfo?
 }

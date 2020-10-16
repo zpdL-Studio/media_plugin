@@ -27,6 +27,7 @@ dependencies:
     path: ../../zpdl_studio_bloc
 
   rxdart: ^0.24.1
+  intl: ^0.16.1
 
 dev_dependencies:
   flutter_test:

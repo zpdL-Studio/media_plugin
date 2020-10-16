@@ -148,7 +148,7 @@ class ZpdlStudioImageQuery: NSObject, PHPhotoLibraryChangeObserver {
                                         id: phAsset.localIdentifier,
                                         width: phAsset.pixelWidth,
                                         height: phAsset.pixelHeight,
-                                        modifyTimeMs: phAsset.modificationDate?.timeIntervalSince1970 ?? 0))
+                                        modifyTimeMs: (phAsset.modificationDate?.timeIntervalSince1970 ?? 0) * 1000))
                     }
 
                     DispatchQueue.main.async {
@@ -209,12 +209,10 @@ class ZpdlStudioImageQuery: NSObject, PHPhotoLibraryChangeObserver {
                 phAsset.requestContentEditingInput(with: nil, completionHandler: { (contentEditingInput, dictInfo) in
                     PHImageManager.default().requestImageData(for: phAsset, options: nil) { (data: Data?, _, _, _) in
                         if let uniformTypeIdentifier = contentEditingInput?.uniformTypeIdentifier, uniformTypeIdentifier == kUTTypeJPEG as String || uniformTypeIdentifier == kUTTypePNG as String {
-                            print("KKH getImageReadBytes JPG id \(id) \(contentEditingInput?.uniformTypeIdentifier ?? "")")
                             DispatchQueue.main.async {
                                 completion(data)
                             }
                         } else if let imageData = data {
-                            print("KKH getImageReadBytes \(contentEditingInput?.uniformTypeIdentifier ?? "")")
                             let uiImage = UIImage(data: imageData)
                             let jpgData = uiImage?.jpegData(compressionQuality: 1.0)
                             DispatchQueue.main.async {
@@ -237,5 +235,28 @@ class ZpdlStudioImageQuery: NSObject, PHPhotoLibraryChangeObserver {
     
     func checkUpdate(_ timeMs: Int) -> Bool {
         return timeMs < Int(modifyTimeMs * 1000)
+    }
+    
+    func getImageInfo(_ id: String, _ completion: @escaping (PluginImageInfo?) -> Void) {
+        DispatchQueue.global(qos: .userInitiated).async {
+            if let phAsset = self.fetchPHAsset(id) {
+                phAsset.requestContentEditingInput(with: nil, completionHandler: { (contentEditingInput, dictInfo) in
+                    DispatchQueue.main.async {
+                        completion(PluginImageInfo(
+                                    id: phAsset.localIdentifier,
+                                    path: contentEditingInput?.fullSizeImageURL?.absoluteString ?? "",
+                                    mimeType: contentEditingInput?.uniformTypeIdentifier ?? "",
+                                    orientation: Int(contentEditingInput?.fullSizeImageOrientation ?? 0),
+                                    width: phAsset.pixelWidth,
+                                    height: phAsset.pixelHeight,
+                                    modifyTimeMs: (phAsset.modificationDate?.timeIntervalSince1970 ?? 0.0) * 1000))
+                    }
+                })
+            } else {
+                DispatchQueue.main.async {
+                    completion(nil)
+                }
+            }
+        }
     }
 }

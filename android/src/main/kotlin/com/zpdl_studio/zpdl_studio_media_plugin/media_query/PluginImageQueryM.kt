@@ -7,10 +7,7 @@ import android.graphics.Matrix
 import android.os.Build
 import android.provider.MediaStore
 import androidx.exifinterface.media.ExifInterface
-import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginDataSet
-import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginFolder
-import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginImage
-import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginSortOrder
+import com.zpdl_studio.zpdl_studio_media_plugin.data.*
 import java.io.File
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -131,8 +128,6 @@ class PluginImageQueryM: PluginImageQuery() {
                 }
                 results.add(PluginImage(
                         id = image.id,
-                        displayName = image.displayName,
-                        orientation = image.orientation ?: 0,
                         width = image.width,
                         height = image.height,
                         modifyTimeMs = image.modifyTimeMs
@@ -146,8 +141,6 @@ class PluginImageQueryM: PluginImageQuery() {
                 }
                 results.add(PluginImage(
                         id = image.id,
-                        displayName = image.displayName,
-                        orientation = image.orientation ?: 0,
                         width = image.width,
                         height = image.height,
                         modifyTimeMs = image.modifyTimeMs
@@ -195,6 +188,20 @@ class PluginImageQueryM: PluginImageQuery() {
         }
     }
 
+    override fun getImageInfo(id: Long): PluginImageInfo? =
+            getImage(id)?.let {
+                PluginImageInfo(
+                        id = it.id,
+                        path = it.data,
+                        displayName = it.displayName,
+                        mimeType = it.mimeType,
+                        orientation = getImageOrientation(it),
+                        width = it.width,
+                        height = it.height,
+                        modifyTimeMs = it.modifyTimeMs
+                )
+            }
+    
     private fun sortOrderQuery(sortOrder: PluginSortOrder?, @Suppress("SameParameterValue") limit: Int?): String {
         val sb = StringBuilder()
         sortOrder?.let {

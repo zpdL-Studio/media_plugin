@@ -2,8 +2,10 @@ package com.zpdl_studio.zpdl_studio_media_plugin
 
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import androidx.annotation.NonNull
 import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginBitmap
+import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginImageInfo
 import com.zpdl_studio.zpdl_studio_media_plugin.data.PluginSortOrder
 import com.zpdl_studio.zpdl_studio_media_plugin.media_query.PluginImageQuery
 import com.zpdl_studio.zpdl_studio_media_plugin.media_query.PluginImageQueryM
@@ -53,6 +55,7 @@ class ZpdlStudioMediaPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
+    Log.i("KKH", "onMethodCall : ${call.method}")
     when(PlatformMethod.from(call.method)) {
       PlatformMethod.GET_IMAGE_FOLDER -> {
         pluginMediaQuery.getImageFolder(pluginPermission)
@@ -141,7 +144,23 @@ class ZpdlStudioMediaPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         }
         result.success(pluginMediaQuery.checkUpdate(timeMs))
       }
+      PlatformMethod.GET_IMAGE_INFO -> Observable.fromCallable<PluginImageInfo> {
+        if(call.arguments is String) {
+          (call.arguments as String).toLongOrNull()?.let {
+            return@fromCallable pluginMediaQuery.getImageInfo(it)
+          }
+        }
+        return@fromCallable null
+      }
+              .subscribeOn(Schedulers.io())
+              .observeOn(AndroidSchedulers.mainThread())
+              .subscribe({
+                result.success(it.pluginToMap())
+              }, {
+                result.success(null)
+              })
       null -> result.notImplemented()
+
     }
   }
 

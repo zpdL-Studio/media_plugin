@@ -111,3 +111,27 @@ class PluginBitmap {
     return null;
   }
 }
+
+class PluginImageInfo {
+  final String id;
+  final String path;
+  final String displayName;
+  final String mimeType;
+  final int orientation;
+  final int width;
+  final int height;
+  final int modifyTimeMs;
+
+  PluginImageInfo(this.id, this.path, this.displayName, this.mimeType, this.orientation, this.width, this.height, this.modifyTimeMs);
+
+  factory PluginImageInfo.map(Map map) => PluginImageInfo(
+    map.get("id"),
+    map.get("path") ?? "",
+    map.get("displayName") ?? "",
+    map.get("mimeType") ?? "",
+    map.get("orientation") ?? 0,
+    map.get("width") ?? 0,
+    map.get("height") ?? 0,
+    map.get("modifyTimeMs") ?? 0,
+  );
+}

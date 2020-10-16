@@ -82,4 +82,12 @@ class ZpdlStudioMediaPlugin {
     }
     return true;
   }
+
+  static Future<PluginImageInfo> getImageInfo(String id) async {
+    final results = await _channel.invokeMethod(PlatformMethod.GET_IMAGE_INFO.method, id);
+    if(results is Map) {
+      return PluginImageInfo.map(results);
+    }
+    return null;
+  }
 }

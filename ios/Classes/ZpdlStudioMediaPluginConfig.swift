@@ -26,4 +26,5 @@ enum PlatformMethod: String {
     case GET_IMAGE_THUMBNAIL = "GET_IMAGE_THUMBNAIL"
     case READ_IMAGE_DATA = "READ_IMAGE_DATA"
     case CHECK_UPDATE = "CHECK_UPDATE"
+    case GET_IMAGE_INFO = "GET_IMAGE_INFO"
 }

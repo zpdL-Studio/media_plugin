@@ -63,7 +63,16 @@ public class SwiftZpdlStudioMediaPlugin: NSObject, FlutterPlugin {
             } else {
                 result(true)
             }
+        case .GET_IMAGE_INFO:
+            if let id = call.arguments as? String {
+                ZpdlStudioImageQuery.shared.getImageInfo(id) { (info: PluginImageInfo?) in
+                    result(info?.pluginToMap())
+                }
+            } else {
+                result(nil)
+            }
         }
+
     }
     
     func getImageFolder(_ sortOrder: PluginSortOrder?, _ result: @escaping FlutterResult) {
