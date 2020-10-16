@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:zpdl_studio_bloc/bloc/bloc.dart';
+import 'package:zpdl_studio_bloc/bloc/bloc_child.dart';
 import 'package:zpdl_studio_bloc/widget/stream_builder_to_widget.dart';
 import 'package:zpdl_studio_bloc/widget/text_field_focus_widget.dart';
 import 'package:zpdl_studio_bloc/widget/touch_well.dart';
 import 'package:zpdl_studio_media_plugin/plugin_data.dart';
 import 'package:zpdl_studio_media_plugin/widget/plugin_Image_widget.dart';
-import 'package:zpdl_studio_media_plugin/widget/plugin_image_provider.dart';
 import 'package:zpdl_studio_media_plugin/zpdl_studio_media_plugin.dart';
-import 'package:intl/intl.dart';
 
-class AlbumPreviewPageBLoC extends BLoCChild with BLoCLifeCycle, BLoCKeyboardState {
+class AlbumPreviewPageBLoC extends BLoCChild with BLoCLifeCycle, BLoCChildKeyboardState, BLoCChildLoading {
 
   AlbumPreviewPageBLoC(this.pluginImage) {
 
@@ -40,6 +40,7 @@ class AlbumPreviewPageBLoC extends BLoCChild with BLoCLifeCycle, BLoCKeyboardSta
   @override
   void onLifeCycleResume() {
     print("KKH AlbumPreviewPageBLoC onLifeCycleResume ${pluginImage.id}");
+    print("KKH AlbumPreviewPageBLoC onLifeCycleResume onBLoCChildKeyboardState ${childKeyboardState != null ? childKeyboardState() : false}");
     if(!launched) {
       launched = true;
       ZpdlStudioMediaPlugin.getImageInfo(pluginImage.id).then((value) =>
@@ -48,19 +49,24 @@ class AlbumPreviewPageBLoC extends BLoCChild with BLoCLifeCycle, BLoCKeyboardSta
   }
 
   @override
-  void onKeyboardState(bool show) {
-    print("KKH onKeyboardState $show ${pluginImage.id}");
+  void onBLoCChildKeyboardState(bool show) {
+    print("KKH AlbumPreviewPageBLoC onBLoCChildKeyboardState ${pluginImage.id} $show");
+  }
+
+  void showLoading() {
+    showBLoCChildLoading();
+    Future.delayed(Duration(seconds: 5)).then((value) => hideBLoCChildLoading());
   }
 }
 
-class AlbumPreviewPage extends BLoCProvider<AlbumPreviewPageBLoC> {
+class AlbumPreviewPage extends BLoCChildProvider<AlbumPreviewPageBLoC> {
 
   final AlbumPreviewPageBLoC bloc;
 
   AlbumPreviewPage(this.bloc);
 
   @override
-  AlbumPreviewPageBLoC createBLoC() => bloc;
+  AlbumPreviewPageBLoC createChildBLoC() => bloc;
 
   @override
   Widget build(BuildContext context, AlbumPreviewPageBLoC bloc) {
@@ -74,7 +80,6 @@ class AlbumPreviewPage extends BLoCProvider<AlbumPreviewPageBLoC> {
             child: PluginImageWidget(
               image: bloc.pluginImage,
               builder: (BuildContext context, ImageProvider<dynamic> imageProvider) {
-                print("KKH AlbumPreviewPage ${bloc.pluginImage.id}");
                 return Image(
                   image: imageProvider,
                   fit: BoxFit.contain,
@@ -126,17 +131,29 @@ class AlbumPreviewPage extends BLoCProvider<AlbumPreviewPageBLoC> {
                   SizedBox(width: 12,),
                   TouchWell(
                     onTap: () {
-                      _showDialogInfo(context, data);
+                      // _showDialogInfo(context, data);
+                      bloc.showLoading();
                     },
                     circleBoard: true,
                     touchWellIsTop: true,
-                    child: SizedBox(width: 24, height: 24, child: Icon(Icons.info, color: Colors.white),),
+                    child: SizedBox(width: 36, height: 36, child: Icon(Icons.info, color: Colors.white),),
                   )
                 ],
               );
             },
           ),
-        )
+        ),
+        Container(
+          height: 44,
+          child: TextFieldFocusWidget(
+            onBuildTextField: (context, focusNode) {
+              return TextField(
+                focusNode: focusNode,
+              );
+            },
+            onHasFocusNode: bloc.childKeyboardStateHasFocusNode,
+          ),
+        ),
       ],
     );
   }

@@ -55,7 +55,6 @@ class ZpdlStudioMediaPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
-    Log.i("KKH", "onMethodCall : ${call.method}")
     when(PlatformMethod.from(call.method)) {
       PlatformMethod.GET_IMAGE_FOLDER -> {
         pluginMediaQuery.getImageFolder(pluginPermission)
