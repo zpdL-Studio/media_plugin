@@ -81,7 +81,7 @@ class ZpdlStudioMediaPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                 pluginPermission,
                 map.getString("id"),
                 PluginSortOrder.from(map.getString("sortOrder")) ?: PluginSortOrder.DATE_DESC,
-                map.getInt("limit"),
+                map.getInt("limit")
         )
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

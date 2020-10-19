@@ -10,6 +10,6 @@ data class PluginFolder(
             "id" to id,
             "displayName" to displayName,
             "count" to count,
-            "modifyTimeMs" to modifyTimeMs,
+            "modifyTimeMs" to modifyTimeMs
     )
 }

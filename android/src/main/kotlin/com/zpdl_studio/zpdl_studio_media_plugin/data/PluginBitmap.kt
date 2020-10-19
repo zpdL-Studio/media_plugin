@@ -13,7 +13,7 @@ data class PluginBitmap(
     override fun pluginToMap(): Map<String, *> = hashMapOf(
             "width" to width,
             "height" to height,
-            "buffer" to buffer.array(),
+            "buffer" to buffer.array()
     )
 
     companion object {

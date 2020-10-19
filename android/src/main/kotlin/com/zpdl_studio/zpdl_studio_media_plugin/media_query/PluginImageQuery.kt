@@ -56,16 +56,16 @@ abstract class PluginImageQuery {
             pluginPermission.requestPermissionsObservable(permissions).flatMap {
                 if (it) {
                     Observable.fromCallable {
-                        PluginDataSet(list = getImageFolder(sortOrder))
+                        PluginDataSet<PluginFolder>(list = getImageFolder(sortOrder))
                     }.subscribeOn(Schedulers.io())
                 } else {
-                    Observable.just(PluginDataSet(list = mutableListOf()))
+                    Observable.just(PluginDataSet<PluginFolder>(list = mutableListOf()))
                 }
             }
 
     fun getImages(pluginPermission: PluginPermission, bucketId: String?, sortOrder: PluginSortOrder = PluginSortOrder.DATE_DESC, limit: Int? = null): Observable<PluginDataSet<PluginImage>> =
             if (!pluginPermission.checkSelfPermission(permissions)) {
-                Observable.just(PluginDataSet(permission = false, list = mutableListOf()))
+                Observable.just(PluginDataSet<PluginImage>(permission = false, list = mutableListOf()))
             } else {
                 Observable.fromCallable {
                     getImages(bucketId, sortOrder, limit)
