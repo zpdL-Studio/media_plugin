@@ -131,8 +131,8 @@ class AlbumPreviewPage extends BLoCChildProvider<AlbumPreviewPageBLoC> {
                   SizedBox(width: 12,),
                   TouchWell(
                     onTap: () {
-                      // _showDialogInfo(context, data);
-                      bloc.showLoading();
+                      _showDialogInfo(context, data);
+                      // bloc.showLoading();
                     },
                     circleBoard: true,
                     touchWellIsTop: true,
@@ -143,17 +143,17 @@ class AlbumPreviewPage extends BLoCChildProvider<AlbumPreviewPageBLoC> {
             },
           ),
         ),
-        Container(
-          height: 44,
-          child: TextFieldFocusWidget(
-            onBuildTextField: (context, focusNode) {
-              return TextField(
-                focusNode: focusNode,
-              );
-            },
-            onHasFocusNode: bloc.childKeyboardStateHasFocusNode,
-          ),
-        ),
+        // Container(
+        //   height: 44,
+        //   child: TextFieldFocusWidget(
+        //     onBuildTextField: (context, focusNode) {
+        //       return TextField(
+        //         focusNode: focusNode,
+        //       );
+        //     },
+        //     onHasFocusNode: bloc.childKeyboardStateHasFocusNode,
+        //   ),
+        // ),
       ],
     );
   }

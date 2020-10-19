@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:zpdl_studio_media_plugin/plugin_data.dart';
 import 'package:zpdl_studio_media_plugin/zpdl_studio_media_plugin.dart';
 
+import 'plugin_thumbnail_cache_loader.dart';
+
 typedef PluginThumbnailLoadingWidgetBuilder = Widget Function(
     BuildContext context,
     PluginImage image,
@@ -45,11 +47,12 @@ class PluginThumbnailWidget extends StatefulWidget {
   final double width;
   final double height;
   final BoxFit boxFit;
+  final PluginThumbnailLoader loader;
   final PluginThumbnailLoadingWidgetBuilder loadingBuilder;
   final PluginThumbnailLoadedWidgetBuilder loadedBuilder;
   final PluginThumbnailErrorWidgetBuilder errorBuilder;
 
-  const PluginThumbnailWidget({
+  PluginThumbnailWidget({
     Key key,
     @required this.image,
     this.thumbnailWidthPx,
@@ -57,10 +60,12 @@ class PluginThumbnailWidget extends StatefulWidget {
     this.width,
     this.height,
     this.boxFit,
+    PluginThumbnailLoader loader,
     this.loadingBuilder,
     this.loadedBuilder,
     this.errorBuilder})
       : assert(image != null),
+        this.loader = loader != null ? loader : PluginThumbnailCacheLoader(),
         super(key: key);
 
   @override
@@ -70,7 +75,7 @@ class PluginThumbnailWidget extends StatefulWidget {
 class _PluginThumbnailState extends State<PluginThumbnailWidget> {
   _LoadState _loadState;
   PluginImage _image;
-  ui.Image _uiImage;
+  ThumbnailCacheImage _thumbnailCacheImage;
   Exception _exception;
 
   @override
@@ -78,17 +83,21 @@ class _PluginThumbnailState extends State<PluginThumbnailWidget> {
     if(_loadState == null || (_image != null && _image.id != widget.image.id)) {
       _loadState = _LoadState.LOADING;
       _image = widget.image;
-      _uiImage?.dispose();
-      _uiImage = null;
+      _thumbnailCacheImage?.dispose();
+      _thumbnailCacheImage = null;
       _exception = null;
-      _loadAsync(_image);
+
+      _thumbnailCacheImage = widget.loader.loadAsync(_image.id, null, null, _pluginThumbnailLoaderCallback);
+      if(_thumbnailCacheImage != null) {
+        this._loadState = _LoadState.LOADED;
+      }
     }
 
     switch(_loadState) {
       case _LoadState.LOADING:
         return _buildLoading(context, widget.image);
       case _LoadState.LOADED:
-        return _buildLoaded(context, _uiImage);
+        return _buildLoaded(context, _thumbnailCacheImage);
       case _LoadState.ERROR:
         return _buildError(context, _exception);
     }
@@ -99,10 +108,29 @@ class _PluginThumbnailState extends State<PluginThumbnailWidget> {
     );
   }
 
+  void _pluginThumbnailLoaderCallback(ThumbnailCacheImage image, Exception e) {
+    if (mounted) {
+      if(image != null) {
+        setState(() {
+          this._loadState = _LoadState.LOADED;
+          this._thumbnailCacheImage = image;
+        });
+      } else {
+        setState(() {
+          this._loadState = _LoadState.LOADED;
+          this._thumbnailCacheImage = image;
+        });
+      }
+    }
+  }
+
   @override
   void dispose() {
-    _uiImage?.dispose();
-    _uiImage = null;
+    if(_thumbnailCacheImage == null) {
+      widget.loader.cancelAsync(_pluginThumbnailLoaderCallback);
+    }
+    _thumbnailCacheImage?.dispose();
+    _thumbnailCacheImage = null;
     _image = null;
     _exception = null;
     _loadState = null;
@@ -117,17 +145,17 @@ class _PluginThumbnailState extends State<PluginThumbnailWidget> {
     );
   }
 
-  Widget _buildLoaded(BuildContext context, ui.Image uiImage,) {
+  Widget _buildLoaded(BuildContext context, ThumbnailCacheImage thumbnail,) {
     return Container(
       width: widget.width,
       height: widget.height,
       child: widget.loadedBuilder != null
-          ? widget.loadedBuilder(context, uiImage)
+          ? widget.loadedBuilder(context, thumbnail.image)
           : RawImage(
               width: widget.width,
               height: widget.height,
               fit: widget.boxFit,
-              image: uiImage,
+              image: thumbnail.image,
             ),
     );
   }
@@ -138,45 +166,6 @@ class _PluginThumbnailState extends State<PluginThumbnailWidget> {
       height: widget.height,
       child: widget.errorBuilder != null ? widget.errorBuilder(context, e) : null,
     );
-  }
-
-  Future<void> _loadAsync(PluginImage image) async {
-    try {
-      PluginBitmap pluginBitmap = await ZpdlStudioMediaPlugin.getImageThumbnail(image.id, width: widget.thumbnailWidthPx, height: widget.thumbnailHeightPx);
-      if(pluginBitmap != null) {
-        ui.Image uiImage = await decodeImageFromPixels(pluginBitmap);
-        if(uiImage != null) {
-          if(mounted) {
-            setState(() {
-              this._loadState = _LoadState.LOADED;
-              this._uiImage = uiImage;
-            });
-          }
-          return;
-        }
-      }
-      throw Exception("Plugin Image Thumbnail load failed");
-    } catch(e) {
-      if(mounted) {
-        setState(() {
-          this._loadState = _LoadState.ERROR;
-          this._exception = e;
-        });
-      }
-    }
-  }
-
-  Future<ui.Image> decodeImageFromPixels(PluginBitmap pluginBitmap) {
-    Completer<ui.Image> c = new Completer();
-    ui.decodeImageFromPixels(
-        pluginBitmap.buffer,
-        pluginBitmap.width,
-        pluginBitmap.height,
-        ui.PixelFormat.rgba8888,
-            (results) {
-          c.complete(results);
-        });
-    return c.future;
   }
 }
 
