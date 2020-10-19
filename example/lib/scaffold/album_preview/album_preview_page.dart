@@ -169,10 +169,10 @@ class AlbumPreviewPage extends BLoCChildProvider<AlbumPreviewPageBLoC> {
     showDialog(
         context: context,
         child: AlertDialog(
-          title: Text(image.info.displayName.isNotEmpty
-              ? image.info.displayName
-              : image.id,
-            style: TextStyle(fontSize: 14),),
+          title: Text(
+            image.info.displayName,
+            style: TextStyle(fontSize: 14),
+          ),
           contentPadding: EdgeInsets.all(16),
           content: Column(
             mainAxisSize: MainAxisSize.min,
