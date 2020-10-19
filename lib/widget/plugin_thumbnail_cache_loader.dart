@@ -119,6 +119,12 @@ class PluginThumbnailCacheLoader extends PluginThumbnailLoader{
       }
     }
   }
+
+  void evict() {
+    print("KKH _pending ${_pending.length} _cache ${_cache.length}");
+    _pending.clear();
+    _cache.clear();
+  }
 }
 
 class ThumbnailCacheImage {

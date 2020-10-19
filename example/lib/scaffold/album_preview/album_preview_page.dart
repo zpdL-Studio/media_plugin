@@ -4,11 +4,9 @@ import 'package:rxdart/rxdart.dart';
 import 'package:zpdl_studio_bloc/bloc/bloc.dart';
 import 'package:zpdl_studio_bloc/bloc/bloc_child.dart';
 import 'package:zpdl_studio_bloc/widget/stream_builder_to_widget.dart';
-import 'package:zpdl_studio_bloc/widget/text_field_focus_widget.dart';
 import 'package:zpdl_studio_bloc/widget/touch_well.dart';
 import 'package:zpdl_studio_media_plugin/plugin_data.dart';
 import 'package:zpdl_studio_media_plugin/widget/plugin_Image_widget.dart';
-import 'package:zpdl_studio_media_plugin/zpdl_studio_media_plugin.dart';
 
 class AlbumPreviewPageBLoC extends BLoCChild with BLoCLifeCycle, BLoCChildKeyboardState, BLoCChildLoading {
 
@@ -18,8 +16,8 @@ class AlbumPreviewPageBLoC extends BLoCChild with BLoCLifeCycle, BLoCChildKeyboa
 
   final PluginImage pluginImage;
 
-  final _imageInfo = BehaviorSubject<PluginImageInfo>();
-  Stream<PluginImageInfo> get getImageInfoStream => _imageInfo.stream;
+  final _imageInfo = BehaviorSubject<PluginImage>();
+  Stream<PluginImage> get getImageInfoStream => _imageInfo.stream;
 
   @override
   void dispose() {
@@ -43,8 +41,13 @@ class AlbumPreviewPageBLoC extends BLoCChild with BLoCLifeCycle, BLoCChildKeyboa
     print("KKH AlbumPreviewPageBLoC onLifeCycleResume onBLoCChildKeyboardState ${childKeyboardState != null ? childKeyboardState() : false}");
     if(!launched) {
       launched = true;
-      ZpdlStudioMediaPlugin.getImageInfo(pluginImage.id).then((value) =>
-          _imageInfo.sink.add(value));
+      if(pluginImage.info == null) {
+        pluginImage
+            .getImageInfo()
+            .then((value) => _imageInfo.sink.add(pluginImage));
+      } else {
+        _imageInfo.sink.add(pluginImage);
+      }
     }
   }
 
@@ -115,14 +118,14 @@ class AlbumPreviewPage extends BLoCChildProvider<AlbumPreviewPageBLoC> {
           padding: EdgeInsets.symmetric(horizontal: 16),
           child: StreamBuilderToWidget(
             stream: bloc.getImageInfoStream,
-            builder: (BuildContext context, PluginImageInfo data) {
+            builder: (BuildContext context, PluginImage data) {
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Expanded(
                     flex: 1,
                     child: Text(
-                      data.path,
+                      data.info?.fullPath ?? "",
                       style: TextStyle(color: Colors.white, fontSize: 14),
                       softWrap: true,
                       overflow: TextOverflow.fade,
@@ -158,23 +161,26 @@ class AlbumPreviewPage extends BLoCChildProvider<AlbumPreviewPageBLoC> {
     );
   }
 
-  void _showDialogInfo(BuildContext context, PluginImageInfo data) {
+  void _showDialogInfo(BuildContext context, PluginImage image) {
+    if(image.info == null) {
+      return;
+    }
+
     showDialog(
         context: context,
         child: AlertDialog(
-          title: Text((data.displayName.isNotEmpty
-              ? data.displayName
-              : data.id) ?? "",
+          title: Text(image.info.displayName.isNotEmpty
+              ? image.info.displayName
+              : image.id,
             style: TextStyle(fontSize: 14),),
           contentPadding: EdgeInsets.all(16),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildInfo("Path", data.path),
-              _buildInfo("MimeType", data.mimeType),
-              _buildInfo("Orientation", data.orientation.toString()),
-              _buildInfo("size", "${data.width}x${data.height}"),
-              _buildInfo("ModifyTimeMs", DateFormat('yyyy-MM-dd kk:mm:ss').format(DateTime.fromMillisecondsSinceEpoch(data.modifyTimeMs))),
+              _buildInfo("Path", image.info.fullPath),
+              _buildInfo("MimeType", image.info.mimeType),
+              _buildInfo("size", "${image.width}x${image.height}"),
+              _buildInfo("ModifyTimeMs", DateFormat('yyyy-MM-dd kk:mm:ss').format(DateTime.fromMillisecondsSinceEpoch(image.modifyTimeMs))),
             ],
           ),
           actions: <Widget>[

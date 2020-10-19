@@ -128,6 +128,9 @@ class PluginImageQueryM: PluginImageQuery() {
                 }
                 results.add(PluginImage(
                         id = image.id,
+                        fullPath = image.data,
+                        displayName = image.displayName,
+                        mimeType = image.displayName,
                         width = image.width,
                         height = image.height,
                         modifyTimeMs = image.modifyTimeMs
@@ -141,6 +144,9 @@ class PluginImageQueryM: PluginImageQuery() {
                 }
                 results.add(PluginImage(
                         id = image.id,
+                        fullPath = image.data,
+                        displayName = image.displayName,
+                        mimeType = image.displayName,
                         width = image.width,
                         height = image.height,
                         modifyTimeMs = image.modifyTimeMs
@@ -188,19 +194,19 @@ class PluginImageQueryM: PluginImageQuery() {
         }
     }
 
-    override fun getImageInfo(id: Long): PluginImageInfo? =
-            getImage(id)?.let {
-                PluginImageInfo(
-                        id = it.id,
-                        path = it.data,
-                        displayName = it.displayName,
-                        mimeType = it.mimeType,
-                        orientation = getImageOrientation(it),
-                        width = it.width,
-                        height = it.height,
-                        modifyTimeMs = it.modifyTimeMs
-                )
-            }
+//    override fun getImageInfo(id: Long): PluginImageInfo? =
+//            getImage(id)?.let {
+//                PluginImageInfo(
+//                        id = it.id,
+//                        path = it.data,
+//                        displayName = it.displayName,
+//                        mimeType = it.mimeType,
+//                        orientation = getImageOrientation(it),
+//                        width = it.width,
+//                        height = it.height,
+//                        modifyTimeMs = it.modifyTimeMs
+//                )
+//            }
     
     private fun sortOrderQuery(sortOrder: PluginSortOrder?, @Suppress("SameParameterValue") limit: Int?): String {
         val sb = StringBuilder()

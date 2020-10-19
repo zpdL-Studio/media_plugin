@@ -92,6 +92,4 @@ abstract class PluginImageQuery {
     abstract fun getImages(bucketId: String?, sortOrder: PluginSortOrder, limit: Int? = null): PluginDataSet<PluginImage>
 
     abstract fun getImageThumbnail(id: Long, width: Int, height: Int): Bitmap?
-
-    abstract fun getImageInfo(id: Long): PluginImageInfo?
 }

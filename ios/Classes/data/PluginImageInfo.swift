@@ -7,22 +7,16 @@
 
 struct PluginImageInfo: PluginToMap {
     let id: String
-    let path: String
+    let fullPath: String
     let mimeType: String
     let orientation: Int
-    let width: Int
-    let height: Int
-    let modifyTimeMs: TimeInterval
 
     func pluginToMap() -> [String : Any] {
         return [
-            "id": id,
-            "path": path,
+            "fullPath": fullPath,
+            "displayName": id,
             "mimeType": mimeType,
             "orientation": orientation,
-            "width": width,
-            "height": height,
-            "modifyTimeMs": modifyTimeMs
         ]
     }
 }

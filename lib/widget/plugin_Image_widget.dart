@@ -42,7 +42,7 @@ class _PluginImageState extends State<PluginImageWidget> {
 
   @override
   void dispose() {
-    _pluginImageProvider?.evict();
+    // _pluginImageProvider?.evict();
     _pluginImageProvider = null;
     _pluginImageId = null;
     super.dispose();

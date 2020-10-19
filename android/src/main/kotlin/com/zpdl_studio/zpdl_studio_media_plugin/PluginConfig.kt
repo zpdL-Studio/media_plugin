@@ -13,7 +13,7 @@ enum class PlatformMethod(val method: String) {
   GET_IMAGE_THUMBNAIL("${PluginConfig.CHANNEL_NAME}/GET_IMAGE_THUMBNAIL"),
   READ_IMAGE_DATA("${PluginConfig.CHANNEL_NAME}/READ_IMAGE_DATA"),
   CHECK_UPDATE("${PluginConfig.CHANNEL_NAME}/CHECK_UPDATE"),
-  GET_IMAGE_INFO("${PluginConfig.CHANNEL_NAME}/GET_IMAGE_INFO")
+//  GET_IMAGE_INFO("${PluginConfig.CHANNEL_NAME}/GET_IMAGE_INFO")
   ;
 
   companion object {

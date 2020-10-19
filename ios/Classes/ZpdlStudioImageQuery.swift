@@ -244,12 +244,9 @@ class ZpdlStudioImageQuery: NSObject, PHPhotoLibraryChangeObserver {
                     DispatchQueue.main.async {
                         completion(PluginImageInfo(
                                     id: phAsset.localIdentifier,
-                                    path: contentEditingInput?.fullSizeImageURL?.absoluteString ?? "",
+                                    fullPath: contentEditingInput?.fullSizeImageURL?.absoluteString ?? "",
                                     mimeType: contentEditingInput?.uniformTypeIdentifier ?? "",
-                                    orientation: Int(contentEditingInput?.fullSizeImageOrientation ?? 0),
-                                    width: phAsset.pixelWidth,
-                                    height: phAsset.pixelHeight,
-                                    modifyTimeMs: (phAsset.modificationDate?.timeIntervalSince1970 ?? 0.0) * 1000))
+                                    orientation: Int(contentEditingInput?.fullSizeImageOrientation ?? 0)))
                     }
                 })
             } else {
