@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:rxdart/rxdart.dart';
+// import 'package:intl/intl.dart';
+// import 'package:rxdart/rxdart.dart';
 import 'package:zpdl_studio_bloc/bloc/bloc.dart';
 import 'package:zpdl_studio_bloc/bloc/bloc_child.dart';
 import 'package:zpdl_studio_bloc/widget/stream_builder_to_widget.dart';
@@ -10,18 +10,16 @@ import 'package:zpdl_studio_media_plugin/widget/plugin_Image_widget.dart';
 
 class AlbumPreviewPageBLoC extends BLoCChild with BLoCLifeCycle, BLoCChildKeyboardState, BLoCChildLoading {
 
-  AlbumPreviewPageBLoC(this.pluginImage) {
-
-  }
+  AlbumPreviewPageBLoC(this.pluginImage);
 
   final PluginImage pluginImage;
 
-  final _imageInfo = BehaviorSubject<PluginImage>();
-  Stream<PluginImage> get getImageInfoStream => _imageInfo.stream;
+  // final _imageInfo = BehaviorSubject<PluginImage>();
+  // Stream<PluginImage> get getImageInfoStream => _imageInfo.stream;
 
   @override
   void dispose() {
-    _imageInfo.close();
+    // _imageInfo.close();
     super.dispose();
   }
   @override
@@ -31,29 +29,29 @@ class AlbumPreviewPageBLoC extends BLoCChild with BLoCLifeCycle, BLoCChildKeyboa
 
   @override
   void onLifeCyclePause() {
-    print("KKH AlbumPreviewPageBLoC onLifeCyclePause ${pluginImage.id}");
+    print('KKH AlbumPreviewPageBLoC onLifeCyclePause ${pluginImage.id}');
   }
 
   bool launched = false;
   @override
   void onLifeCycleResume() {
-    print("KKH AlbumPreviewPageBLoC onLifeCycleResume ${pluginImage.id}");
-    print("KKH AlbumPreviewPageBLoC onLifeCycleResume onBLoCChildKeyboardState ${childKeyboardState != null ? childKeyboardState() : false}");
+    print('KKH AlbumPreviewPageBLoC onLifeCycleResume ${pluginImage.id}');
+    print('KKH AlbumPreviewPageBLoC onLifeCycleResume onBLoCChildKeyboardState ${getChildKeyboardState()}');
     if(!launched) {
       launched = true;
-      if(pluginImage.info == null) {
-        pluginImage
-            .getImageInfo()
-            .then((value) => _imageInfo.sink.add(pluginImage));
-      } else {
-        _imageInfo.sink.add(pluginImage);
-      }
+      // if(pluginImage.info == null) {
+      //   pluginImage
+      //       .getImageInfo()
+      //       .then((value) => _imageInfo.sink.add(pluginImage));
+      // } else {
+      //   _imageInfo.sink.add(pluginImage);
+      // }
     }
   }
 
   @override
   void onBLoCChildKeyboardState(bool show) {
-    print("KKH AlbumPreviewPageBLoC onBLoCChildKeyboardState ${pluginImage.id} $show");
+    print('KKH AlbumPreviewPageBLoC onBLoCChildKeyboardState ${pluginImage.id} $show');
   }
 
   void showLoading() {
@@ -82,7 +80,7 @@ class AlbumPreviewPage extends BLoCChildProvider<AlbumPreviewPageBLoC> {
             alignment: AlignmentDirectional.center,
             child: PluginImageWidget(
               image: bloc.pluginImage,
-              builder: (BuildContext context, ImageProvider<dynamic> imageProvider) {
+              builder: (BuildContext context, ImageProvider<Object> imageProvider) {
                 return Image(
                   image: imageProvider,
                   fit: BoxFit.contain,
@@ -113,39 +111,39 @@ class AlbumPreviewPage extends BLoCChildProvider<AlbumPreviewPageBLoC> {
             ),
           ),
         ),
-        Container(
-          height: 44,
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          child: StreamBuilderToWidget(
-            stream: bloc.getImageInfoStream,
-            builder: (BuildContext context, PluginImage data) {
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    flex: 1,
-                    child: Text(
-                      data.info?.fullPath ?? "",
-                      style: TextStyle(color: Colors.white, fontSize: 14),
-                      softWrap: true,
-                      overflow: TextOverflow.fade,
-                    ),
-                  ),
-                  SizedBox(width: 12,),
-                  TouchWell(
-                    onTap: () {
-                      _showDialogInfo(context, data);
-                      // bloc.showLoading();
-                    },
-                    circleBoard: true,
-                    touchWellIsTop: true,
-                    child: SizedBox(width: 36, height: 36, child: Icon(Icons.info, color: Colors.white),),
-                  )
-                ],
-              );
-            },
-          ),
-        ),
+        // Container(
+        //   height: 44,
+        //   padding: EdgeInsets.symmetric(horizontal: 16),
+        //   child: StreamBuilderToWidget(
+        //     stream: bloc.getImageInfoStream,
+        //     builder: (BuildContext context, PluginImage data) {
+        //       return Row(
+        //         crossAxisAlignment: CrossAxisAlignment.center,
+        //         children: [
+        //           Expanded(
+        //             flex: 1,
+        //             child: Text(
+        //               data.info?.fullPath ?? '',
+        //               style: TextStyle(color: Colors.white, fontSize: 14),
+        //               softWrap: true,
+        //               overflow: TextOverflow.fade,
+        //             ),
+        //           ),
+        //           SizedBox(width: 12,),
+        //           TouchWell(
+        //             onTap: () {
+        //               _showDialogInfo(context, data);
+        //               // bloc.showLoading();
+        //             },
+        //             circleBoard: true,
+        //             touchWellIsTop: true,
+        //             child: SizedBox(width: 36, height: 36, child: Icon(Icons.info, color: Colors.white),),
+        //           )
+        //         ],
+        //       );
+        //     },
+        //   ),
+        // ),
         // Container(
         //   height: 44,
         //   child: TextFieldFocusWidget(
@@ -162,7 +160,8 @@ class AlbumPreviewPage extends BLoCChildProvider<AlbumPreviewPageBLoC> {
   }
 
   void _showDialogInfo(BuildContext context, PluginImage image) {
-    if(image.info == null) {
+    var info = image.info;
+    if(info == null) {
       return;
     }
 
@@ -170,24 +169,24 @@ class AlbumPreviewPage extends BLoCChildProvider<AlbumPreviewPageBLoC> {
         context: context,
         child: AlertDialog(
           title: Text(
-            image.info.displayName,
+            info.displayName,
             style: TextStyle(fontSize: 14),
           ),
           contentPadding: EdgeInsets.all(16),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildInfo("Path", image.info.fullPath),
-              _buildInfo("MimeType", image.info.mimeType),
-              _buildInfo("size", "${image.width}x${image.height}"),
-              _buildInfo("ModifyTimeMs", DateFormat('yyyy-MM-dd kk:mm:ss').format(DateTime.fromMillisecondsSinceEpoch(image.modifyTimeMs))),
+              _buildInfo('Path', info.fullPath),
+              _buildInfo('MimeType', info.mimeType),
+              _buildInfo("size", '${image.width}x${image.height}'),
+              // _buildInfo('ModifyTimeMs', DateFormat('yyyy-MM-dd kk:mm:ss').format(DateTime.fromMillisecondsSinceEpoch(image.modifyTimeMs))),
             ],
           ),
           actions: <Widget>[
             FlatButton(
               child: Text('OK'),
               onPressed: () {
-                Navigator.pop(context, "OK");
+                Navigator.pop(context, 'OK');
               },
             ),
           ],
@@ -203,14 +202,14 @@ class AlbumPreviewPage extends BLoCChildProvider<AlbumPreviewPageBLoC> {
   );
 
   Text _buildInfoSubject(String text) => Text(
-        "$text : ",
+        '$text : ',
         style: TextStyle(fontSize: 12),
       );
 
   Widget _buildInfoText(String text) => Expanded(
     flex: 1,
     child: Text(
-      text ?? "",
+      text,
       style: TextStyle(fontSize: 12),
     ),
   );

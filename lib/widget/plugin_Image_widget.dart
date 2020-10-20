@@ -5,7 +5,7 @@ import 'plugin_image_provider.dart';
 
 typedef PluginImageBuilder = Widget Function(
     BuildContext context,
-    ImageProvider imageProvider,
+    ImageProvider<Object> imageProvider,
     );
 
 class PluginImageWidget extends StatefulWidget {
@@ -14,11 +14,10 @@ class PluginImageWidget extends StatefulWidget {
   final PluginImageBuilder builder;
 
   const PluginImageWidget({
-    Key key,
-    @required this.image,
-    @required this.builder,
-  })  : assert(image != null),
-        super(key: key);
+    Key? key,
+    required this.image,
+    required this.builder,
+  })  : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _PluginImageState();
@@ -26,15 +25,17 @@ class PluginImageWidget extends StatefulWidget {
 
 class _PluginImageState extends State<PluginImageWidget> {
 
-  PluginImageProvider _pluginImageProvider;
-  String _pluginImageId;
+  PluginImageProvider? _pluginImageProvider;
+  String? _pluginImageId;
 
   @override
   Widget build(BuildContext context) {
+    var _pluginImageProvider = this._pluginImageProvider;
     if(_pluginImageProvider == null || _pluginImageId != widget.image.id) {
       _pluginImageId = widget.image.id;
       _pluginImageProvider?.evict();
-      _pluginImageProvider = PluginImageProvider(_pluginImageId);
+      _pluginImageProvider = PluginImageProvider(widget.image.id);
+      this._pluginImageProvider = _pluginImageProvider;
     }
 
     return widget.builder(context, _pluginImageProvider);

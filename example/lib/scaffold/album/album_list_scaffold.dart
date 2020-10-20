@@ -9,13 +9,13 @@ import 'album_list_bloc.dart';
 
 class AlbumListScaffold extends BLoCScaffoldProvider<AlbumListBloc> {
 
-  AlbumListScaffold({Key key}): super(key: key);
+  AlbumListScaffold({Key? key}): super(key: key);
 
   @override
   AlbumListBloc createBLoC() => AlbumListBloc();
 
   @override
-  PreferredSizeWidget appBar(BuildContext context, AlbumListBloc bloc) => AppBar(
+  PreferredSizeWidget? appBar(BuildContext context, AlbumListBloc bloc) => AppBar(
         title: const Text('Album'),
       );
 
@@ -24,62 +24,62 @@ class AlbumListScaffold extends BLoCScaffoldProvider<AlbumListBloc> {
     return SafeArea(
       child: Column(
         children: [
-          StreamBuilderToWidget(
-            stream: bloc.getFoldersStream,
-            builder: (BuildContext context, List<AlbumFolder> data) {
-              return Card(
-                child: Container(
-                  height: (bloc.itemWidth + 16).toDouble(),
-                  child: ListView.builder(
-                    padding: EdgeInsets.symmetric(horizontal: 8),
-                    scrollDirection: Axis.horizontal,
-                    itemBuilder: (context, index) {
-                      return _buildFolder(data[index], bloc.itemWidth.toDouble(), () {
-                        bloc.changeFolder(data[index]);
-                      });
-                    },
-                    itemCount: data.length,
-                  ),
-                ),
-              );
-            },
-          ),
-          Expanded(
-            flex: 1,
-            child: StreamBuilderToWidget(
-              stream: bloc.getImagesStream,
-              builder: (BuildContext context, List<PluginImage> data) {
-                return Container(
-                  padding: EdgeInsets.all(16),
-                  child: GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: bloc.itemRowCount,
-                      childAspectRatio: 1,
-                      mainAxisSpacing: bloc.itemSpace.toDouble(),
-                      crossAxisSpacing: bloc.itemSpace.toDouble(),
-                    ),
-                    itemBuilder: (context, index) {
-                      return TouchWell(
-                        touchWellIsTop: true,
-                        onTap: () {
-                          bloc.onTapImage(data[index]);
-                        },
-                        child: PluginThumbnailWidget(
-                          width: double.infinity,
-                          height: double.infinity,
-                          image: data[index],
-                          boxFit: BoxFit.contain,
-                          errorBuilder: (BuildContext context, Exception e) {
-                            return Center(child: Text(e.toString()),);
-                          },
-                        ),
-                      );
-                    },
-                    itemCount: data.length,
-                  ),
-                );
-              },
-            ),)
+          // StreamBuilderToWidget(
+          //   stream: bloc.getFoldersStream,
+          //   builder: (BuildContext context, List<AlbumFolder> data) {
+          //     return Card(
+          //       child: Container(
+          //         height: (bloc.itemWidth + 16).toDouble(),
+          //         child: ListView.builder(
+          //           padding: EdgeInsets.symmetric(horizontal: 8),
+          //           scrollDirection: Axis.horizontal,
+          //           itemBuilder: (context, index) {
+          //             return _buildFolder(data[index], bloc.itemWidth.toDouble(), () {
+          //               bloc.changeFolder(data[index]);
+          //             });
+          //           },
+          //           itemCount: data.length,
+          //         ),
+          //       ),
+          //     );
+          //   },
+          // ),
+          // Expanded(
+          //   flex: 1,
+          //   child: StreamBuilderToWidget(
+          //     stream: bloc.getImagesStream,
+          //     builder: (BuildContext context, List<PluginImage> data) {
+          //       return Container(
+          //         padding: EdgeInsets.all(16),
+          //         child: GridView.builder(
+          //           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          //             crossAxisCount: bloc.itemRowCount,
+          //             childAspectRatio: 1,
+          //             mainAxisSpacing: bloc.itemSpace.toDouble(),
+          //             crossAxisSpacing: bloc.itemSpace.toDouble(),
+          //           ),
+          //           itemBuilder: (context, index) {
+          //             return TouchWell(
+          //               touchWellIsTop: true,
+          //               onTap: () {
+          //                 bloc.onTapImage(data[index]);
+          //               },
+          //               child: PluginThumbnailWidget(
+          //                 width: double.infinity,
+          //                 height: double.infinity,
+          //                 image: data[index],
+          //                 boxFit: BoxFit.contain,
+          //                 errorBuilder: (BuildContext context, Object? e) {
+          //                   return Center(child: Text(e.toString()),);
+          //                 },
+          //               ),
+          //             );
+          //           },
+          //           itemCount: data.length,
+          //         ),
+          //       );
+          //     },
+          //   ),)
         ],
       ),
     );
@@ -105,12 +105,12 @@ class AlbumListScaffold extends BLoCScaffoldProvider<AlbumListBloc> {
                 height: size,
                 boxFit: BoxFit.cover,
                 loadingBuilder: (BuildContext context, PluginFolder folder) {
-                  return Center(child: Text("Loading"),);
+                  return Center(child: Text('Loading'),);
                 },
                 emptyBuilder: (BuildContext context, PluginFolder folder) {
                   return Center(child: Text(folder.displayName),);
                 },
-                errorBuilder: (BuildContext context, Exception e) {
+                errorBuilder: (BuildContext context, Object? e) {
                   return Center(child: Text(e.toString()),);
                 },
               ),

@@ -23,31 +23,26 @@ enum PluginSortOrder {
 
 extension PluginSortOrderExtension on PluginSortOrder {
   String get sortOrder {
-    String result = "";
     switch(this) {
       case PluginSortOrder.DATE_DESC:
-        result = "DATE_DESC";
-        break;
+        return 'DATE_DESC';
       case PluginSortOrder.DATE_ARC:
-        result = "DATE_ARC";
-        break;
+        return 'DATE_ARC';
     }
-
-    return result;
   }
 }
 
 class PluginFolder {
-  final String id;
+  final String? id;
   final String displayName;
   final int count;
 
   PluginFolder(this.id, this.displayName, this.count);
 
   factory PluginFolder.map(Map map) => PluginFolder(
-        map.get("id"),
-        map.get("displayName") ?? "",
-        map.get("count") ?? 0,
+        map.get('id'),
+        map.get('displayName') ?? '',
+        map.get('count') ?? 0,
       );
 
   @override
@@ -64,9 +59,9 @@ class PluginImageInfo {
   PluginImageInfo(this.fullPath, this.displayName, this.mimeType);
 
   factory PluginImageInfo.map(Map map) => PluginImageInfo(
-    map.get("fullPath") ?? "",
-    map.get("displayName") ?? "",
-    map.get("mimeType") ?? "",
+    map.get('fullPath') ?? '',
+    map.get('displayName') ?? '',
+    map.get('mimeType') ?? '',
   );
 }
 
@@ -75,26 +70,26 @@ class PluginImage {
   final int width;
   final int height;
   final int modifyTimeMs;
-  PluginImageInfo _info;
+  PluginImageInfo? _info;
 
   PluginImage(this.id, this.width, this.height, this.modifyTimeMs,
-      {PluginImageInfo info})
-      : this._info = info;
+      {PluginImageInfo? info})
+      : _info = info;
 
   factory PluginImage.map(Map map) => PluginImage(
-      map.get("id"),
-      map.get("width") ?? 0,
-      map.get("height") ?? 0,
-      map.get("modifyTimeMs") ?? 0,
-      info: map.get("info", converter: (map) {
+      map.get('id') ?? '',
+      map.get('width') ?? 0,
+      map.get('height') ?? 0,
+      map.get('modifyTimeMs') ?? 0,
+      info: map.get('info', converter: (map) {
         return PluginImageInfo.map(map);
       }));
 
-  Future<Uint8List> readImageData() => ZpdlStudioMediaPlugin.readImageData(id);
+  Future<Uint8List?> readImageData() => ZpdlStudioMediaPlugin.readImageData(id);
 
-  PluginImageInfo get info => _info;
+  PluginImageInfo? get info => _info;
 
-  Future<PluginImageInfo> getImageInfo() async {
+  Future<PluginImageInfo?> getImageInfo() async {
     _info = await ZpdlStudioMediaPlugin.getImageInfo(id);
     return _info;
   }
@@ -115,7 +110,6 @@ class PluginImage {
   String toString() {
     return 'PluginImage{id: $id, width: $width, height: $height, modifyTimeMs: $modifyTimeMs}';
   }
-
 }
 
 class PluginBitmap {
@@ -125,10 +119,10 @@ class PluginBitmap {
 
   PluginBitmap(this.width, this.height, this.buffer);
 
-  factory PluginBitmap.map(Map map) {
-    int width = map.get("width");
-    int height = map.get("height");
-    Uint8List buffer = map.get("buffer");
+  static PluginBitmap? map(Map map) {
+    var width = map.get('width');
+    var height = map.get('height');
+    var buffer = map.get<Uint8List?>('buffer');
 
     if(width > 0 && height > 0 && buffer != null) {
       return PluginBitmap(width, height, buffer);

@@ -9,42 +9,43 @@ import 'album_preview_page.dart';
 
 class AlbumPreviewScaffold extends BLoCScaffoldProvider<AlbumPreviewBLoC> {
   final String folderName;
-  final String currentId;
+  final String? currentId;
   final List<PluginImage> list;
 
-  AlbumPreviewScaffold(this.folderName, this.currentId, this.list, {Key key}): super(key: key, bodyColor: Colors.black);
+  AlbumPreviewScaffold(this.folderName, this.currentId, this.list, {Key? key}): super(key: key, bodyColor: Colors.black);
 
   @override
   AlbumPreviewBLoC createBLoC() => AlbumPreviewBLoC(folderName, currentId, list);
 
   @override
   PreferredSizeWidget appBar(BuildContext context, AlbumPreviewBLoC bloc) => AppBar(
-        title: Text(bloc.folderName ?? ""),
+        title: Text(bloc.folderName),
       );
 
   @override
   Widget body(BuildContext context, AlbumPreviewBLoC bloc) {
-    AlbumPreviewBLoC albumPreviewBLoC = BLoCProvider.of(context);
+    var albumPreviewBLoC = BLoCProvider.of(context);
     if(albumPreviewBLoC != null) {
-      print("KKH body found albumPreviewBLoC");
+      print('KKH body found albumPreviewBLoC');
     } else {
-      print("KKH body not found albumPreviewBLoC");
+      print('KKH body not found albumPreviewBLoC');
     }
 
-    return SafeArea(
-      child: StreamBuilderToWidget(
-        stream: bloc.getPageBLoCStream,
-        builder: (BuildContext context, List<AlbumPreviewPageBLoC> data) {
-          return PageView.builder(
-            controller: bloc.pageController,
-            itemBuilder: (context, index) {
-              return AlbumPreviewPage(data[index]);
-            },
-            itemCount: data.length,
-            // physics: NeverScrollableScrollPhysics(),
-          );
-        },
-      ),
-    );
+    // return SafeArea(
+    //   child: StreamBuilderToWidget(
+    //     stream: bloc.getPageBLoCStream,
+    //     builder: (BuildContext context, List<AlbumPreviewPageBLoC> data) {
+    //       return PageView.builder(
+    //         controller: bloc.pageController,
+    //         itemBuilder: (context, index) {
+    //           return AlbumPreviewPage(data[index]);
+    //         },
+    //         itemCount: data.length,
+    //         // physics: NeverScrollableScrollPhysics(),
+    //       );
+    //     },
+    //   ),
+    // );
+    return Container();
   }
 }

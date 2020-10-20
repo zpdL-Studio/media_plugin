@@ -4,10 +4,10 @@ import 'dart:ui' as ui;
 import 'package:zpdl_studio_media_plugin/plugin_data.dart';
 import 'package:zpdl_studio_media_plugin/zpdl_studio_media_plugin.dart';
 
-typedef PluginThumbnailLoaderCallback = void Function(ThumbnailCacheImage image, Exception e);
+typedef PluginThumbnailLoaderCallback = void Function(ThumbnailCacheImage? image, Object? e);
 
 abstract class PluginThumbnailLoader {
-  ThumbnailCacheImage loadAsync(String id, int width, int height, PluginThumbnailLoaderCallback callback);
+  ThumbnailCacheImage? loadAsync(String id, int? width, int? height, PluginThumbnailLoaderCallback callback);
   
   void cancelAsync(PluginThumbnailLoaderCallback callback);
 }
@@ -25,16 +25,16 @@ class PluginThumbnailCacheLoader extends PluginThumbnailLoader{
 
   int _loadingCount = 0;
 
-  final Map<_LoadKey, ThumbnailCacheImage> _cache = Map();
-  final List<_LoadKey> _cacheKeys = List();
-  final List<_LoadItem> _pending = List();
+  final Map<_LoadKey, ThumbnailCacheImage> _cache = {};
+  final List<_LoadKey> _cacheKeys = [];
+  final List<_LoadItem> _pending = [];
 
   @override
-  ThumbnailCacheImage loadAsync(String id, int width, int height, PluginThumbnailLoaderCallback callback) {
+  ThumbnailCacheImage? loadAsync(String id, int? width, int? height, PluginThumbnailLoaderCallback callback) {
     // print("KKH loadAsync id : $id");
     final key = _LoadKey(id, width, height);
 
-    ThumbnailCacheImage thumbnailCacheImage = _cache[key];
+    var thumbnailCacheImage = _cache[key];
     if (thumbnailCacheImage != null) {
       // print("KKH loadAsync cache : $id");
       _cacheKeys.remove(key);
@@ -59,13 +59,13 @@ class PluginThumbnailCacheLoader extends PluginThumbnailLoader{
   void _loadAsync(_LoadKey key, PluginThumbnailLoaderCallback callback) async {
     _loadingCount++;
     try {
-      PluginBitmap pluginBitmap = await ZpdlStudioMediaPlugin.getImageThumbnail(key.id, width: key.width, height: key.height);
+      var pluginBitmap = await ZpdlStudioMediaPlugin.getImageThumbnail(key.id, width: key.width, height: key.height);
       if(pluginBitmap != null) {
-        ui.Image uiImage = await decodeImageFromPixels(pluginBitmap);
+        var uiImage = await decodeImageFromPixels(pluginBitmap);
         if(uiImage != null) {
           final thumbnailCacheImage = ThumbnailCacheImage(uiImage);
           if(_cacheKeys.length >= maximumSize) {
-            _LoadKey _key = _cacheKeys.removeAt(0);
+            var _key = _cacheKeys.removeAt(0);
             _cache.remove(_key)?.dispose();
           }
           _cacheKeys.add(key);
@@ -77,7 +77,7 @@ class PluginThumbnailCacheLoader extends PluginThumbnailLoader{
           return;
         }
       }
-      throw Exception("PluginThumbnailCacheLoader Thumbnail load failed");
+      throw Exception('PluginThumbnailCacheLoader Thumbnail load failed');
     } catch(e) {
       _loadingCount--;
       callback(null, e);
@@ -86,10 +86,10 @@ class PluginThumbnailCacheLoader extends PluginThumbnailLoader{
   }
 
   void loadPending() {
-    if(_pending.length > 0 && _loadingCount < coincident) {
-      _LoadItem loadItem = _pending.removeLast();
+    if(_pending.isNotEmpty && _loadingCount < coincident) {
+      var loadItem = _pending.removeLast();
 
-      ThumbnailCacheImage image = _cache[loadItem.key];
+      var image = _cache[loadItem.key];
       if(image != null) {
         _cacheKeys.remove(loadItem.key);
         _cacheKeys.add(loadItem.key);
@@ -100,8 +100,8 @@ class PluginThumbnailCacheLoader extends PluginThumbnailLoader{
     }
   }
 
-  Future<ui.Image> decodeImageFromPixels(PluginBitmap pluginBitmap) {
-    Completer<ui.Image> c = Completer();
+  Future<ui.Image?> decodeImageFromPixels(PluginBitmap pluginBitmap) {
+    var c = Completer<ui.Image?>();
     ui.decodeImageFromPixels(pluginBitmap.buffer, pluginBitmap.width,
         pluginBitmap.height, ui.PixelFormat.rgba8888, (results) {
       c.complete(results);
@@ -121,7 +121,6 @@ class PluginThumbnailCacheLoader extends PluginThumbnailLoader{
   }
 
   void evict() {
-    print("KKH _pending ${_pending.length} _cache ${_cache.length}");
     _pending.clear();
     _cache.clear();
   }
@@ -145,8 +144,8 @@ class ThumbnailCacheImage {
 
 class _LoadKey {
   final String id;
-  final int width;
-  final int height;
+  final int? width;
+  final int? height;
 
   _LoadKey(this.id, this.width, this.height);
 

@@ -6,7 +6,8 @@ description: Demonstrates how to use the zpdl_studio_media_plugin plugin.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: ">=2.10.0 <3.0.0"
+  flutter: ">=1.20.0 <2.0.0"
 
 dependencies:
   flutter:
@@ -26,10 +27,11 @@ dependencies:
   zpdl_studio_bloc:
     path: ../../zpdl_studio_bloc
 
-  rxdart: ^0.24.1
-  intl: ^0.16.1
+#  rxdart: ^0.24.1
+#  intl: ^0.16.1
 
 dev_dependencies:
+#  pedantic: ^1.8.0
   flutter_test:
     sdk: flutter
 
