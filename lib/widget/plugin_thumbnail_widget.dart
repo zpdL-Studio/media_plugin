@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:zpdl_studio_media_plugin/plugin_data.dart';
 import 'package:zpdl_studio_media_plugin/zpdl_studio_media_plugin.dart';
 
+import 'plugin_image_provider.dart';
 import 'plugin_thumbnail_cache_loader.dart';
 
 typedef PluginThumbnailLoadingWidgetBuilder = Widget Function(
@@ -24,7 +24,7 @@ typedef PluginFolderThumbnailEmptyWidgetBuilder = Widget Function(
 
 typedef PluginThumbnailLoadedWidgetBuilder = Widget Function(
     BuildContext context,
-    ui.Image image,
+    PluginBitmapProvider imageProvider,
     );
 
 typedef PluginThumbnailErrorWidgetBuilder = Widget Function(
@@ -75,7 +75,7 @@ class PluginThumbnailWidget extends StatefulWidget {
 class _PluginThumbnailState extends State<PluginThumbnailWidget> {
   _LoadState _loadState;
   PluginImage _image;
-  ThumbnailCacheImage _thumbnailCacheImage;
+  PluginBitmapProvider _provider;
   Exception _exception;
 
   @override
@@ -83,12 +83,13 @@ class _PluginThumbnailState extends State<PluginThumbnailWidget> {
     if(_loadState == null || (_image != null && _image.id != widget.image.id)) {
       _loadState = _LoadState.LOADING;
       _image = widget.image;
-      _thumbnailCacheImage?.dispose();
-      _thumbnailCacheImage = null;
+      _provider?.evict();
+      _provider = null;
       _exception = null;
 
-      _thumbnailCacheImage = widget.loader.loadAsync(_image.id, null, null, _pluginThumbnailLoaderCallback);
-      if(_thumbnailCacheImage != null) {
+      final bitmap = widget.loader.loadAsync(_image.id, null, null, _pluginThumbnailLoaderCallback);
+      if(bitmap != null) {
+        this._provider = PluginBitmapProvider(bitmap);
         this._loadState = _LoadState.LOADED;
       }
     }
@@ -97,7 +98,7 @@ class _PluginThumbnailState extends State<PluginThumbnailWidget> {
       case _LoadState.LOADING:
         return _buildLoading(context, widget.image);
       case _LoadState.LOADED:
-        return _buildLoaded(context, _thumbnailCacheImage);
+        return _buildLoaded(context, _provider);
       case _LoadState.ERROR:
         return _buildError(context, _exception);
     }
@@ -108,17 +109,19 @@ class _PluginThumbnailState extends State<PluginThumbnailWidget> {
     );
   }
 
-  void _pluginThumbnailLoaderCallback(ThumbnailCacheImage image, Exception e) {
+  void _pluginThumbnailLoaderCallback(PluginBitmap bitmap, Exception e) {
     if (mounted) {
-      if(image != null) {
+      if(bitmap != null) {
         setState(() {
           this._loadState = _LoadState.LOADED;
-          this._thumbnailCacheImage = image;
+          this._provider = PluginBitmapProvider(bitmap);
+          this._exception = null;
         });
       } else {
         setState(() {
-          this._loadState = _LoadState.LOADED;
-          this._thumbnailCacheImage = image;
+          this._loadState = _LoadState.ERROR;
+          this._provider = null;
+          this._exception = e;
         });
       }
     }
@@ -126,11 +129,10 @@ class _PluginThumbnailState extends State<PluginThumbnailWidget> {
 
   @override
   void dispose() {
-    if(_thumbnailCacheImage == null) {
+    if(_provider == null && this._exception == null) {
       widget.loader.cancelAsync(_pluginThumbnailLoaderCallback);
     }
-    _thumbnailCacheImage?.dispose();
-    _thumbnailCacheImage = null;
+    _provider = null;
     _image = null;
     _exception = null;
     _loadState = null;
@@ -145,17 +147,17 @@ class _PluginThumbnailState extends State<PluginThumbnailWidget> {
     );
   }
 
-  Widget _buildLoaded(BuildContext context, ThumbnailCacheImage thumbnail,) {
+  Widget _buildLoaded(BuildContext context, PluginBitmapProvider provider,) {
     return Container(
       width: widget.width,
       height: widget.height,
       child: widget.loadedBuilder != null
-          ? widget.loadedBuilder(context, thumbnail.image)
-          : RawImage(
+          ? widget.loadedBuilder(context, provider)
+          : Image(
               width: widget.width,
               height: widget.height,
               fit: widget.boxFit,
-              image: thumbnail.image,
+              image: provider,
             ),
     );
   }
