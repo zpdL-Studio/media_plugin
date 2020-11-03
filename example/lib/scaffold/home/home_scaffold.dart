@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:zpdl_studio_bloc/bloc/bloc.dart';
 import 'package:zpdl_studio_bloc/bloc/bloc_scaffold.dart';
+import 'package:zpdl_studio_bloc/widget/slider_widget.dart';
 import 'package:zpdl_studio_media_plugin_example/scaffold/album/album_list_scaffold.dart';
 
 class _Bloc extends BLoCScaffold {
 
   @override
   void dispose() {
-
+    super.dispose();
   }
 }
 
@@ -36,7 +36,7 @@ class HomeScaffold extends BLoCScaffoldProvider<_Bloc> {
                   context,
                   MaterialPageRoute(builder: (context) => AlbumListScaffold()));
             },
-          )
+          ),
         ],
       ),
     );
