@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:zpdl_studio_bloc/bloc/bloc.dart';
 import 'package:zpdl_studio_bloc/bloc/bloc_child.dart';
 import 'package:zpdl_studio_bloc/bloc/bloc_scaffold.dart';
 import 'package:zpdl_studio_media_plugin/plugin_data.dart';
@@ -9,7 +10,7 @@ import 'package:zpdl_studio_media_plugin/widget/plugin_thumbnail_cache_loader.da
 
 import 'album_preview_page.dart';
 
-class AlbumPreviewBLoC extends BLoCScaffold with BLoCParent, BLoCKeyboardState {
+class AlbumPreviewBLoC extends BLoCScaffold with BLoCParent, BLoCKeyboardState, BLoCLifeCycle {
   String currentId;
   PageController pageController;
 
@@ -38,11 +39,22 @@ class AlbumPreviewBLoC extends BLoCScaffold with BLoCParent, BLoCKeyboardState {
   void dispose() {
     _pageBLoC.close();
     PluginThumbnailCacheLoader().evict();
+    super.dispose();
   }
 
   @override
   void onKeyboardState(bool show) {
     super.onKeyboardState(show);
     print("KKH onKeyboardState AlbumPreviewBLoC $show");
+  }
+
+  @override
+  void onLifeCyclePause() {
+    print("KKH AlbumPreviewBLoC onLifeCyclePause");
+  }
+
+  @override
+  void onLifeCycleResume() {
+    print("KKH AlbumPreviewBLoC onLifeCycleResume");
   }
 }

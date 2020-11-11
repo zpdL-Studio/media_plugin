@@ -28,10 +28,12 @@ class AlbumListBloc extends BLoCScaffold with BLoCLifeCycle {
   void dispose() {
     _folders.close();
     _images.close();
+    super.dispose();
   }
 
   @override
   void onLifeCycleResume() async {
+    print("KKH AlbumListBloc onLifeCycleResume");
     BuildContext context = buildContext;
     if(context == null) {
       return;
@@ -51,7 +53,7 @@ class AlbumListBloc extends BLoCScaffold with BLoCLifeCycle {
 
   @override
   void onLifeCyclePause() {
-
+    print("KKH AlbumListBloc onLifeCyclePause");
   }
 
   void refresh() {
@@ -127,6 +129,7 @@ class AlbumListBloc extends BLoCScaffold with BLoCLifeCycle {
         }
       }
       final images = await _images.first;
+      // BLoCProvider.of(context)?.
       Navigator.push(
           context,
           MaterialPageRoute(

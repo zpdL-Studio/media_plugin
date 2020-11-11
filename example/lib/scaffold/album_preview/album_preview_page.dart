@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:zpdl_studio_bloc/bloc/bloc.dart';
 import 'package:zpdl_studio_bloc/bloc/bloc_child.dart';
 import 'package:zpdl_studio_bloc/widget/stream_builder_to_widget.dart';
 import 'package:zpdl_studio_bloc/widget/touch_well.dart';
 import 'package:zpdl_studio_media_plugin/plugin_data.dart';
 import 'package:zpdl_studio_media_plugin/widget/plugin_Image_widget.dart';
 
-class AlbumPreviewPageBLoC extends BLoCChild with BLoCLifeCycle, BLoCChildKeyboardState, BLoCChildLoading {
+class AlbumPreviewPageBLoC extends BLoCChild with BLoCChildKeyboardState, BLoCChildLoading {
 
   AlbumPreviewPageBLoC(this.pluginImage) {
 
@@ -24,21 +23,18 @@ class AlbumPreviewPageBLoC extends BLoCChild with BLoCLifeCycle, BLoCChildKeyboa
     _imageInfo.close();
     super.dispose();
   }
+
   @override
   void disposeChild() {
     // print("KKH AlbumPreviewPageBLoC disposeChild ${pluginImage.id}");
-  }
-
-  @override
-  void onLifeCyclePause() {
-    print("KKH AlbumPreviewPageBLoC onLifeCyclePause ${pluginImage.id}");
+    super.disposeChild();
   }
 
   bool launched = false;
   @override
-  void onLifeCycleResume() {
-    print("KKH AlbumPreviewPageBLoC onLifeCycleResume ${pluginImage.id}");
-    print("KKH AlbumPreviewPageBLoC onLifeCycleResume onBLoCChildKeyboardState ${childKeyboardState != null ? childKeyboardState() : false}");
+  void onAttach() {
+    print("KKH AlbumPreviewPageBLoC onAttach ${pluginImage.id}");
+    print("KKH AlbumPreviewPageBLoC onAttach onBLoCChildKeyboardState ${childKeyboardState != null ? childKeyboardState() : false}");
     if(!launched) {
       launched = true;
       if(pluginImage.info == null) {
